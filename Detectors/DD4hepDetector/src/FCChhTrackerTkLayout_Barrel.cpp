@@ -37,13 +37,13 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
   // has min/max dimensions of tracker for visualization etc.
   std::string                 detectorName = xmlDet.nameStr();
   DetElement                  topDetElement(detectorName, xmlDet.id());
-  Acts::ActsExtension::Config volConfig;
-  volConfig.isBarrel               = true;
-  Acts::ActsExtension* detWorldExt = new Acts::ActsExtension(volConfig);
+  Acts::ActsExtension::Config barrelConfig;
+  barrelConfig.isBarrel = true;
+  // detElement owns extension
+  Acts::ActsExtension* detWorldExt = new Acts::ActsExtension(barrelConfig);
   topDetElement.addExtension<Acts::IActsExtension>(detWorldExt);
-  double       l_overlapMargin = 0.0001;
   dd4hep::Tube topVolumeShape(dimensions.rmin(),
-                              dimensions.rmax() + l_overlapMargin,
+                              dimensions.rmax(),
                               (dimensions.zmax() - dimensions.zmin()) * 0.5);
   Volume topVolume(detectorName, topVolumeShape, lcdd.air());
   topVolume.setVisAttributes(lcdd.invisible());
@@ -51,8 +51,7 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
   // counts all layers - incremented in the inner loop over repeat - tags
   unsigned int layerCounter                       = 0;
   double       integratedModuleComponentThickness = 0;
-  unsigned int nPhi;
-  double       phi = 0;
+  double       phi                                = 0;
   // loop over 'layer' nodes in xml
   dd4hep::xml::Component xLayers = xmlElement.child(_Unicode(layers));
   for (dd4hep::xml::Collection_t xLayerColl(xLayers, _U(layer));
@@ -60,30 +59,32 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
        ++xLayerColl) {
     dd4hep::xml::Component xLayer
         = static_cast<dd4hep::xml::Component>(xLayerColl);
-    dd4hep::xml::Component xRods        = xLayer.child(_Unicode(rods));
-    dd4hep::xml::Component xRodEven     = xRods.child(_Unicode(rodOdd));
-    dd4hep::xml::Component xRodOdd      = xRods.child(_Unicode(rodEven));
-    dd4hep::xml::Component xModulesEven = xRodEven.child(_Unicode(modules));
+    dd4hep::xml::Component xRods        = xLayer.child("rods");
+    dd4hep::xml::Component xRodEven     = xRods.child("rodOdd");
+    dd4hep::xml::Component xRodOdd      = xRods.child("rodEven");
+    dd4hep::xml::Component xModulesEven = xRodEven.child("modules");
     dd4hep::xml::Component xModulePropertiesOdd
-        = xRodOdd.child(_Unicode(moduleProperties));
-    dd4hep::xml::Component xModulesOdd     = xRodOdd.child(_Unicode(modules));
-    double                 l_overlapMargin = 0.0001;
-    dd4hep::Tube           layerShape(
-        xLayer.rmin(), xLayer.rmax() + l_overlapMargin, dimensions.zmax());
-    Volume layerVolume("layer", layerShape, lcdd.material("Air"));
-    layerVolume.setVisAttributes(lcdd.invisible());
+        = xRodOdd.child("moduleProperties");
+    dd4hep::xml::Component xModulesOdd = xRodOdd.child("modules");
+    dd4hep::Tube layerShape(xLayer.rmin(), xLayer.rmax(), dimensions.zmax());
+    Volume       layerVolume("layer", layerShape, lcdd.material("Air"));
+    // layerVolume.setVisAttributes(lcdd.invisible());
     PlacedVolume placedLayerVolume = topVolume.placeVolume(layerVolume);
     placedLayerVolume.addPhysVolID("layer", layerCounter);
     DetElement lay_det(
         topDetElement, "layer" + std::to_string(layerCounter), layerCounter);
     Acts::ActsExtension::Config layConfig;
-    layConfig.isLayer             = true;
-    layConfig.axes                = "ZXY";
-    Acts::ActsExtension* detlayer = new Acts::ActsExtension(layConfig);
-    lay_det.addExtension<Acts::IActsExtension>(detlayer);
+    layConfig.isLayer = true;
+    // the local coordinate systems of modules in dd4hep and acts differ
+    // see http://acts.web.cern.ch/ACTS/latest/doc/group__DD4hepPlugins.html
+    layConfig.axes = "XzY";  // correct translation of local x axis in dd4hep to
+                             // local x axis in acts
+    // detElement owns extension
+    Acts::ActsExtension* layerExtension = new Acts::ActsExtension(layConfig);
+    lay_det.addExtension<Acts::IActsExtension>(layerExtension);
     lay_det.setPlacement(placedLayerVolume);
     dd4hep::xml::Component xModuleComponentsOdd
-        = xModulePropertiesOdd.child(_Unicode(components));
+        = xModulePropertiesOdd.child("components");
     integratedModuleComponentThickness = 0;
     int    moduleCounter               = 0;
     Volume moduleVolume;
@@ -99,19 +100,13 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
                       0.5 * xModuleComponentOdd.thickness(),
                       0.5 * xModulePropertiesOdd.attr<double>("modLength")),
           lcdd.material(xModuleComponentOdd.materialStr()));
-
-      // create the Acts::DigitizationModule (needed to do geometric
-      // digitization) for all modules which have the same segmentation
-      auto digiModule = Acts::rectangleDigiModule(
-          0.5 * xModulePropertiesOdd.attr<double>("modLength"),
-          0.5 * xModulePropertiesOdd.attr<double>("modWidth"),
-          0.5 * xModuleComponentOdd.thickness(),
-          sensDet.readout().segmentation());
-
-      double lX, lY, lZ;
-      nPhi = xRods.repeat();
+      moduleVolume.setVisAttributes(lcdd.invisible());
+      unsigned int          nPhi = xRods.repeat();
       dd4hep::xml::Handle_t currentComp;
       for (unsigned int phiIndex = 0; phiIndex < nPhi; ++phiIndex) {
+        double lX = 0;
+        double lY = 0;
+        double lZ = 0;
         if (0 == phiIndex % 2) {
           phi = 2 * M_PI * static_cast<double>(phiIndex)
               / static_cast<double>(nPhi);
@@ -144,13 +139,6 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
                                "module" + std::to_string(moduleCounter),
                                moduleCounter);
             mod_det.setPlacement(placedModuleVolume);
-
-            // create and attach the extension with the shared digitzation
-            // module
-            Acts::ActsExtension* moduleExtension
-                = new Acts::ActsExtension(digiModule);
-            mod_det.addExtension<Acts::IActsExtension>(moduleExtension);
-
             ++moduleCounter;
           }
         }

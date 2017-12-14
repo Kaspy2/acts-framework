@@ -20,14 +20,11 @@ create_element(dd4hep::Detector& lcdd, xml_h e, dd4hep::SensitiveDetector)
   xml_det_t   x_det    = e;
   std::string det_name = x_det.nameStr();
   // Make DetElement
-  DetElement beamtube(det_name, x_det.id());
-  // add Extension to Detlement for the RecoGeometry
+  DetElement                  beamtube(det_name, x_det.id());
   Acts::ActsExtension::Config volConfig;
-  volConfig.isBeampipe = true;
-  // ownership of extension object given to the DetElement
+  volConfig.isBeampipe           = true;
   Acts::ActsExtension* detvolume = new Acts::ActsExtension(volConfig);
   beamtube.addExtension<Acts::IActsExtension>(detvolume);
-  // add Extension to Detlement for the RecoGeometry
   dd4hep::xml::Dimension x_det_dim(x_det.dimensions());
   Tube   tube_shape(x_det_dim.rmin(), x_det_dim.rmax(), x_det_dim.z());
   Volume tube_vol(det_name,
