@@ -32,21 +32,30 @@ namespace Options {
     opt.add_options()(
         "dd4hep-input",
         po::value<read_strings>()->multitoken()->default_value(
-            {"file:Detectors/DD4hepDetector/compact/FCChhTrackerTkLayout.xml"}),
+            {"file:Detectors/DD4hepDetector/compact/FCChhBaseline/"
+             "FCChh_DectEmptyMaster.xml",
+             "file:Detectors/DD4hepDetector/compact/FCChhBaseline/"
+             "FCChhTrackerTkLayout.xml"}),
         "The locations of the input DD4hep files, use 'file:foo.xml'. In case "
         "you want to read in multiple files, just seperate the strings by "
         "space.")("dd4hep-envelopeR",
                   po::value<double>()->default_value(0.),
                   "The envelop cover in R for DD4hep volumes.")(
+        "dd4hep-envelopeR",
+        po::value<double>()->default_value(1. * Acts::units::_mm),
+        "The tolerance added to the geometrical extension in r of the "
+        "layers contained to build the volume envelope around in mm.")(
         "dd4hep-envelopeZ",
-        po::value<double>()->default_value(0.),
-        "The envelop cover in z for DD4hep volumes.")(
+        po::value<double>()->default_value(1. * Acts::units::_mm),
+        "The tolerance added to the geometrical extension in z of the "
+        "layers contained to build the volume envelope around in mm.")(
         "dd4hep-digitizationmodules",
         po::value<bool>()->default_value(false),
         "The envelop cover in z for DD4hep volumes.")(
         "dd4hep-loglevel",
         po::value<size_t>()->default_value(2),
-        "The output log level of the geometry building. Please set the wished "
+        "The output log level of the geometry building. Please set the "
+        "wished "
         "number (0 = VERBOSE, 1 = "
         "DEBUG, 2 = INFO, 3 = WARNING, 4 = ERROR, 5 = FATAL).");
   }
