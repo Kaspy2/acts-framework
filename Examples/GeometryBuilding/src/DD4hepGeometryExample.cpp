@@ -21,6 +21,8 @@ main(int argc, char* argv[])
 
   // Declare the supported program options.
   po::options_description desc("Allowed options");
+  // add help message
+  desc.add_options()("help", "Produce help message");
   // add the detector options
   FW::Options::addDD4hepOptions<po::options_description>(desc);
   po::variables_map vm;
