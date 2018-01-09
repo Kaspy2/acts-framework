@@ -35,7 +35,7 @@ namespace Options {
             {"file:Detectors/DD4hepDetector/compact/FCChhBaseline/"
              "FCChh_DectEmptyMaster.xml",
              "file:Detectors/DD4hepDetector/compact/FCChhBaseline/"
-             "FCChhTrackerTkLayout.xml"}),
+             "Tracker.xml"}),
         "The locations of the input DD4hep files, use 'file:foo.xml'. In case "
         "you want to read in multiple files, just seperate the strings by "
         "space.")("dd4hep-envelopeR",

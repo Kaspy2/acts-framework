@@ -43,4 +43,4 @@ create_element(Detector& lcdd, xml_h e, SensitiveDetector sens)
   return beamtube;
 }
 
-DECLARE_DETELEMENT(BeamTube, create_element)
+DECLARE_DETELEMENT(BeamPipe, create_element)

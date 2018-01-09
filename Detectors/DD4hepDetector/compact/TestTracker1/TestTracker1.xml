@@ -4,17 +4,14 @@
     xs:noNamespaceSchemaLocation="http://www.lcsim.org/schemas/compact/1.0/compact.xsd">
     
     <includes>
-        <gdmlFile  ref="elements.xml"/>
-        <gdmlFile  ref="materials.xml"/>
+        <gdmlFile  ref="../elements.xml"/>
+        <gdmlFile  ref="../materials.xml"/>
     </includes>
     
-    <info name="FCCTracker"
-        title="A test tracker in FCC dimensions"
-        author="julia.hrdinka@cern.ch"
-        url="none"
-        status="development"
-        version="$Id:??$">
-        <comment>First demonstration tracker in FCC dimensions, containing simple silicon modules, without any substructure or support material. The example contains three hierarchies, a pixel tracker, a short strip and a long strip tracker.</comment>
+    <info name="TestTracker1"
+        title="A test tracker in FCC dimensions and 'ATLAS-style'"
+        author="julia.hrdinka@cern.ch" url="" status="test" version="0">
+        <comment>First demonstration tracker in FCC dimensions, containing simple silicon modules, without any substructure or support material. The example contains three hierarchies, a pixel tracker, a short strip and a long strip tracker</comment>
     </info>
     
     <define>
@@ -25,7 +22,7 @@
         <constant name="world_z" value="world_size"/>
         <constant name="Tube_rmin" value="0.*mm"/>
         <constant name="Tube_rmax" value="15.*mm"/>
-        <constant name="Tube_length" value="1865.*mm"/>
+        <constant name="Tube_length" value="1000.*cm"/>
         <!--Envelope0-->
         <constant name="Env0_rmin"          value="1.9*cm"/>
         <constant name="Env0_rmax"          value="94.*cm"/>
@@ -220,27 +217,27 @@
     </readouts>
 
 
-  <include ref="FCCTrackerPixel.xml"/>
-  <include ref="FCCTrackerShortStrip.xml"/> 
-  <include ref="FCCTrackerLongStrip.xml"/>
+  <include ref="TestTracker1Pixel.xml"/>
+  <include ref="TestTracker1ShortStrip.xml"/> 
+  <include ref="TestTracker1LongStrip.xml"/>
 
     <detectors>
     <!--BeamTube-->
-        <detector id="0" name="beampipe" type="BeamTube">
+        <detector id="0" name="beampipe" type="BeamPipe">
             <status id="0"/>
             <dimensions rmin="Tube_rmin" rmax="Tube_rmax" z="Tube_length" vis="violet" material="Air"/>
         </detector>
-        <detector id="1" name="FCCTrackerPixel" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
+        <detector id="1" name="TestTracker1Pixel" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
             <composite name="Barrel0"/>
             <composite name="nEndCap0"/>
             <composite name="pEndCap0"/>
         </detector>
-        <detector id="2" name="FCCTrackerShortStrip" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
+        <detector id="2" name="TestTracker1ShortStrip" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
             <composite name="Barrel1"/>
             <composite name="nEndCap1"/>
             <composite name="pEndCap1"/>
         </detector>
-        <detector id="3" name="FCCTrackerLongStrip" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
+        <detector id="3" name="TestTracker1LongStrip" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
             <composite name="Barrel2"/>
             <composite name="nEndCap2"/>
             <composite name="pEndCap2"/>

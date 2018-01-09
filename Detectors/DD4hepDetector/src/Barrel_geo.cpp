@@ -117,12 +117,13 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     // mapped
     // hand over modules to ACTS
     Acts::ActsExtension::Config layConfig;
-    layConfig.isLayer               = true;
-    layConfig.axes                  = "YxZ";
-    layConfig.materialBins1         = 100;
-    layConfig.materialBins2         = 100;
-    layConfig.layerMaterialPosition = Acts::LayerMaterialPos::outer;
-    Acts::ActsExtension* detlayer   = new Acts::ActsExtension(layConfig);
+    layConfig.isLayer = true;
+    layConfig.axes    = "YxZ";
+    /// @todo re-enable material mapping
+    //  layConfig.materialBins1         = 100;
+    //  layConfig.materialBins2         = 100;
+    //  layConfig.layerMaterialPosition = Acts::LayerMaterialPos::outer;
+    Acts::ActsExtension* detlayer = new Acts::ActsExtension(layConfig);
     lay_det.addExtension<Acts::IActsExtension>(detlayer);
     // Place layer volume
     PlacedVolume placedLayer = tube_vol.placeVolume(layer_vol);
