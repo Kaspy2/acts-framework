@@ -38,4 +38,4 @@ create_element(dd4hep::Detector& lcdd, xml_h e, dd4hep::SensitiveDetector)
   return beamtube;
 }
 
-DECLARE_DETELEMENT(FCChhBeampipe, create_element)
+DECLARE_DETELEMENT(BeamTube, create_element)
