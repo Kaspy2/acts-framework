@@ -88,6 +88,11 @@ namespace DD4hep {
       /// in the description of the Acts::ActsExtension class.
       bool buildDigitizationModules;
 
+      double defaultLayerThickness;
+
+      std::function<void(std::vector<dd4hep::DetElement>& detectors)>
+          sortDetectors;
+
       Config(const std::string&   lname = "GeometryService",
              Acts::Logging::Level level = Acts::Logging::INFO)
         : logger(Acts::getDefaultLogger(lname, level))

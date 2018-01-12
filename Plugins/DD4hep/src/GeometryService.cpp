@@ -80,7 +80,9 @@ FW::DD4hep::GeometryService::buildTrackingGeometry()
                                               m_cfg.bTypeZ,
                                               m_cfg.envelopeR,
                                               m_cfg.envelopeZ,
-                                              m_cfg.buildDigitizationModules));
+                                              m_cfg.buildDigitizationModules,
+                                              m_cfg.defaultLayerThickness,
+                                              m_cfg.sortDetectors));
   return FW::ProcessCode::SUCCESS;
 }
 
