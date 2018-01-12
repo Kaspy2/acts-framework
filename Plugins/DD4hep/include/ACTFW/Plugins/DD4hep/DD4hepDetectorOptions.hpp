@@ -24,6 +24,33 @@ namespace FW {
 
 namespace Options {
 
+  void
+  sortFCChhDetElements(std::vector<dd4hep::DetElement>& det)
+  {
+    std::vector<dd4hep::DetElement> tracker;
+    std::vector<dd4hep::DetElement> muon;
+    for (auto& detElement : det) {
+      std::string detName = detElement.name();
+      if (detName.find("Muon") != std::string::npos)
+        muon.push_back(detElement);
+      else
+        tracker.push_back(detElement);
+    }
+    sort(muon.begin(),
+         muon.end(),
+         [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
+           return (a.id() < b.id());
+         });
+    sort(tracker.begin(),
+         tracker.end(),
+         [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
+           return (a.id() < b.id());
+         });
+    det.clear();
+    det = tracker;
+    det.insert(det.end(), muon.begin(), muon.end());
+  }
+
   /// the particle gun options, the are prefixes with gp
   template <class AOPT>
   void
@@ -39,7 +66,7 @@ namespace Options {
         "The locations of the input DD4hep files, use 'file:foo.xml'. In case "
         "you want to read in multiple files, just seperate the strings by "
         "space.")("dd4hep-envelopeR",
-                  po::value<double>()->default_value(0.),
+                  po::value<double>()->default_value(1. * Acts::units::_mm),
                   "The envelop cover in R for DD4hep volumes.")(
         "dd4hep-envelopeR",
         po::value<double>()->default_value(1. * Acts::units::_mm),
@@ -52,6 +79,14 @@ namespace Options {
         "dd4hep-digitizationmodules",
         po::value<bool>()->default_value(false),
         "The envelop cover in z for DD4hep volumes.")(
+        "dd4hep-layerThickness",
+        po::value<double>()->default_value(10e-10),
+        "In case no surfaces (to be contained by the layer) are handed over, "
+        "the layer thickness will be set to this value.")(
+        "dd4hep-buildFCChh",
+        po::value<bool>()->default_value(true),
+        "If you are not building the FCChh detector please set this flag to "
+        "false.")(
         "dd4hep-loglevel",
         po::value<size_t>()->default_value(2),
         "The output log level of the geometry building. Please set the "
@@ -80,6 +115,10 @@ namespace Options {
     gsConfig.envelopeZ    = vm["dd4hep-envelopeZ"].template as<double>();
     gsConfig.buildDigitizationModules
         = vm["dd4hep-digitizationmodules"].template as<bool>();
+    gsConfig.defaultLayerThickness
+        = vm["dd4hep-layerThickness"].template as<double>();
+    if (vm["dd4hep-buildFCChh"].template as<bool>())
+      gsConfig.sortDetectors = sortFCChhDetElements;
     return gsConfig;
   }
 }
