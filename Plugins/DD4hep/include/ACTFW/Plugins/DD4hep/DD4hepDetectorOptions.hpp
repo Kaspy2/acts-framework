@@ -28,16 +28,32 @@ namespace Options {
   sortFCChhDetElements(std::vector<dd4hep::DetElement>& det)
   {
     std::vector<dd4hep::DetElement> tracker;
+    std::vector<dd4hep::DetElement> eCal;
+    std::vector<dd4hep::DetElement> hCal;
     std::vector<dd4hep::DetElement> muon;
     for (auto& detElement : det) {
       std::string detName = detElement.name();
       if (detName.find("Muon") != std::string::npos)
         muon.push_back(detElement);
+      else if (detName.find("ECal") != std::string::npos)
+        eCal.push_back(detElement);
+      else if (detName.find("HCal") != std::string::npos)
+        hCal.push_back(detElement);
       else
         tracker.push_back(detElement);
     }
     sort(muon.begin(),
          muon.end(),
+         [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
+           return (a.id() < b.id());
+         });
+    sort(eCal.begin(),
+         eCal.end(),
+         [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
+           return (a.id() < b.id());
+         });
+    sort(hCal.begin(),
+         hCal.end(),
          [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
            return (a.id() < b.id());
          });
@@ -48,6 +64,9 @@ namespace Options {
          });
     det.clear();
     det = tracker;
+
+    det.insert(det.end(), eCal.begin(), eCal.end());
+    det.insert(det.end(), hCal.begin(), hCal.end());
     det.insert(det.end(), muon.begin(), muon.end());
   }
 

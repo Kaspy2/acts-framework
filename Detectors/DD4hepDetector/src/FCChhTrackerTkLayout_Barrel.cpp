@@ -88,18 +88,31 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
     integratedModuleComponentThickness = 0;
     int    moduleCounter               = 0;
     Volume moduleVolume;
+    // collect tracker material
+    std::vector<std::pair<dd4hep::Material,double>> compMaterials;
+    
+    for (dd4hep::xml::Collection_t xModuleComponentOddColl(xModuleComponentsOdd,
+                                                           _U(component));
+         nullptr != xModuleComponentOddColl;
+         ++xModuleComponentOddColl) {
+      dd4hep::xml::Component xModuleComponentOdd
+          = static_cast<dd4hep::xml::Component>(xModuleComponentOddColl); 
+      // collect module materials
+      compMaterials.push_back(std::make_pair(lcdd.material(xModuleComponentOdd.materialStr()),xModuleComponentOdd.thickness()));
+    }
     for (dd4hep::xml::Collection_t xModuleComponentOddColl(xModuleComponentsOdd,
                                                            _U(component));
          nullptr != xModuleComponentOddColl;
          ++xModuleComponentOddColl) {
       dd4hep::xml::Component xModuleComponentOdd
           = static_cast<dd4hep::xml::Component>(xModuleComponentOddColl);
-      moduleVolume = Volume(
+      Volume moduleVolume = Volume(
           "module",
           dd4hep::Box(0.5 * xModulePropertiesOdd.attr<double>("modWidth"),
                       0.5 * xModuleComponentOdd.thickness(),
                       0.5 * xModulePropertiesOdd.attr<double>("modLength")),
           lcdd.material(xModuleComponentOdd.materialStr()));
+
       moduleVolume.setVisAttributes(lcdd.invisible());
       unsigned int          nPhi = xRods.repeat();
       dd4hep::xml::Handle_t currentComp;
@@ -138,6 +151,10 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
             DetElement mod_det(lay_det,
                                "module" + std::to_string(moduleCounter),
                                moduleCounter);
+            // add extension to hand over material
+            Acts::ActsExtension* moduleExtension = new Acts::ActsExtension(compMaterials);
+            mod_det.addExtension<Acts::IActsExtension>(moduleExtension);
+
             mod_det.setPlacement(placedModuleVolume);
             ++moduleCounter;
           }

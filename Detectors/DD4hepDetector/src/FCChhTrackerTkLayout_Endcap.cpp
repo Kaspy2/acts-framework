@@ -98,7 +98,17 @@ createTkLayoutTrackerEndcap(dd4hep::Detector&         lcdd,
             = xModuleProperties.child(_Unicode(components));
         Component xSensorProperties = xRing.child(_Unicode(sensorProperties));
 
+        // the component materials
+        std::vector<std::pair<dd4hep::Material,double>> compMaterials; 
         // place components in module
+        for (dd4hep::xml::Collection_t xCompColl(xModulePropertiesComp,
+                                                        _U(component));
+         nullptr != xCompColl;
+         ++xCompColl) {
+         dd4hep::xml::Component xComp = static_cast<Component>(xCompColl);
+         // collect module materials
+         compMaterials.push_back(std::make_pair(lcdd.material(xComp.materialStr()),xComp.thickness()));
+         }
         double integratedCompThickness = 0.;
         for (dd4hep::xml::Collection_t xCompColl(xModulePropertiesComp,
                                                  _U(component));
@@ -167,8 +177,13 @@ createTkLayoutTrackerEndcap(dd4hep::Detector&         lcdd,
               DetElement moduleDetElement(discDetElementVec.back(),
                                           "comp" + std::to_string(compCounter),
                                           compCounter);
-              moduleDetElement.setPlacement(placedComponentVolume);
-              ++compCounter;
+              
+            // add extension to hand over material
+            Acts::ActsExtension* moduleExtension = new Acts::ActsExtension(compMaterials);
+            moduleDetElement.addExtension<Acts::IActsExtension>(moduleExtension);
+            
+            moduleDetElement.setPlacement(placedComponentVolume);
+            ++compCounter;
             }
           }
           integratedCompThickness += xComp.thickness();
