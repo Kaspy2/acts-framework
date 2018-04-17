@@ -99,31 +99,46 @@ createTkLayoutTrackerEndcap(dd4hep::Detector&         lcdd,
         Component xSensorProperties = xRing.child(_Unicode(sensorProperties));
 
         // the component materials
-        std::vector<std::pair<dd4hep::Material,double>> compMaterials; 
+        std::vector<std::pair<dd4hep::Material, double>> compMaterials;
         // place components in module
         for (dd4hep::xml::Collection_t xCompColl(xModulePropertiesComp,
-                                                        _U(component));
-         nullptr != xCompColl;
-         ++xCompColl) {
-         dd4hep::xml::Component xComp = static_cast<Component>(xCompColl);
-         // collect module materials
-         compMaterials.push_back(std::make_pair(lcdd.material(xComp.materialStr()),xComp.thickness()));
-         }
+                                                 _U(component));
+             nullptr != xCompColl;
+             ++xCompColl) {
+          dd4hep::xml::Component xComp = static_cast<Component>(xCompColl);
+          // collect module materials
+          compMaterials.push_back(std::make_pair(
+              lcdd.material(xComp.materialStr()), xComp.thickness()));
+        }
         double integratedCompThickness = 0.;
         for (dd4hep::xml::Collection_t xCompColl(xModulePropertiesComp,
                                                  _U(component));
              nullptr != xCompColl;
              ++xCompColl) {
           Component xComp = static_cast<Component>(xCompColl);
-          Volume    componentVolume(
-              "component",
-              dd4hep::Trapezoid(
-                  0.5 * xModuleProperties.attr<double>("modWidthMin"),
-                  0.5 * xModuleProperties.attr<double>("modWidthMax"),
-                  0.5 * xComp.thickness(),
-                  0.5 * xComp.thickness(),
-                  0.5 * xSensorProperties.attr<double>("sensorLength")),
-              lcdd.material(xComp.materialStr()));
+          double    compMinWidth
+              = 0.5 * xModuleProperties.attr<double>("modWidthMin");
+          double compMaxWidth
+              = 0.5 * xModuleProperties.attr<double>("modWidthMax");
+          double compThickness = 0.5 * xComp.thickness();
+          double compLength
+              = 0.5 * xSensorProperties.attr<double>("sensorLength");
+          Volume componentVolume("component",
+                                 dd4hep::Trapezoid(compMinWidth,
+                                                   compMaxWidth,
+                                                   compThickness,
+                                                   compThickness,
+                                                   compLength),
+                                 lcdd.material(xComp.materialStr()));
+
+          // Create digitization module
+          auto digiModule = det::utils::trapezoidalDigiModuleXZ(compMinWidth,
+                                                                compMaxWidth,
+                                                                compLength,
+                                                                compThickness,
+                                                                xRing.X(),
+                                                                xRing.Z());
+
           componentVolume.setVisAttributes(lcdd.invisible());
           unsigned int nPhi = xRing.attr<int>("nModules");
           double       phi  = 0;
@@ -177,13 +192,15 @@ createTkLayoutTrackerEndcap(dd4hep::Detector&         lcdd,
               DetElement moduleDetElement(discDetElementVec.back(),
                                           "comp" + std::to_string(compCounter),
                                           compCounter);
-              
-            // add extension to hand over material
-            Acts::ActsExtension* moduleExtension = new Acts::ActsExtension(compMaterials);
-            moduleDetElement.addExtension<Acts::IActsExtension>(moduleExtension);
-            
-            moduleDetElement.setPlacement(placedComponentVolume);
-            ++compCounter;
+
+              // add extension to hand over material
+              Acts::ActsExtension* moduleExtension
+                  = new Acts::ActsExtension(compMaterials, digiModule);
+              moduleDetElement.addExtension<Acts::IActsExtension>(
+                  moduleExtension);
+
+              moduleDetElement.setPlacement(placedComponentVolume);
+              ++compCounter;
             }
           }
           integratedCompThickness += xComp.thickness();

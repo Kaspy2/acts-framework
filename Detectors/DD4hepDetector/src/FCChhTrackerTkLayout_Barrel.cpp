@@ -88,17 +88,20 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
     integratedModuleComponentThickness = 0;
     int    moduleCounter               = 0;
     Volume moduleVolume;
+
     // collect tracker material
-    std::vector<std::pair<dd4hep::Material,double>> compMaterials;
-    
+    std::vector<std::pair<dd4hep::Material, double>> compMaterials;
+
     for (dd4hep::xml::Collection_t xModuleComponentOddColl(xModuleComponentsOdd,
                                                            _U(component));
          nullptr != xModuleComponentOddColl;
          ++xModuleComponentOddColl) {
       dd4hep::xml::Component xModuleComponentOdd
-          = static_cast<dd4hep::xml::Component>(xModuleComponentOddColl); 
+          = static_cast<dd4hep::xml::Component>(xModuleComponentOddColl);
       // collect module materials
-      compMaterials.push_back(std::make_pair(lcdd.material(xModuleComponentOdd.materialStr()),xModuleComponentOdd.thickness()));
+      compMaterials.push_back(
+          std::make_pair(lcdd.material(xModuleComponentOdd.materialStr()),
+                         xModuleComponentOdd.thickness()));
     }
     for (dd4hep::xml::Collection_t xModuleComponentOddColl(xModuleComponentsOdd,
                                                            _U(component));
@@ -106,12 +109,18 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
          ++xModuleComponentOddColl) {
       dd4hep::xml::Component xModuleComponentOdd
           = static_cast<dd4hep::xml::Component>(xModuleComponentOddColl);
-      Volume moduleVolume = Volume(
-          "module",
-          dd4hep::Box(0.5 * xModulePropertiesOdd.attr<double>("modWidth"),
-                      0.5 * xModuleComponentOdd.thickness(),
-                      0.5 * xModulePropertiesOdd.attr<double>("modLength")),
-          lcdd.material(xModuleComponentOdd.materialStr()));
+      auto moduleWidth = 0.5 * xModulePropertiesOdd.attr<double>("modWidth");
+      auto moduleThickness = 0.5 * xModuleComponentOdd.thickness();
+      auto moduleLength = 0.5 * xModulePropertiesOdd.attr<double>("modLength");
+      Volume moduleVolume
+          = Volume("module",
+                   dd4hep::Box(moduleWidth, moduleThickness, moduleLength),
+                   lcdd.material(xModuleComponentOdd.materialStr()));
+
+      // Create digitization module
+      // with readout given by layer
+      auto digiModule = det::utils::rectangleDigiModuleXZ(
+          moduleWidth, moduleLength, moduleThickness, xLayer.X(), xLayer.Z());
 
       moduleVolume.setVisAttributes(lcdd.invisible());
       unsigned int          nPhi = xRods.repeat();
@@ -152,7 +161,8 @@ createTkLayoutTrackerBarrel(dd4hep::Detector&         lcdd,
                                "module" + std::to_string(moduleCounter),
                                moduleCounter);
             // add extension to hand over material
-            Acts::ActsExtension* moduleExtension = new Acts::ActsExtension(compMaterials);
+            Acts::ActsExtension* moduleExtension
+                = new Acts::ActsExtension(compMaterials, digiModule);
             mod_det.addExtension<Acts::IActsExtension>(moduleExtension);
 
             mod_det.setPlacement(placedModuleVolume);
