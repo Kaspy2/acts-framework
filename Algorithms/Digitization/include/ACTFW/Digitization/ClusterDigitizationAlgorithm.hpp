@@ -26,7 +26,7 @@ public:
 	
 private:
 
-	struct SingleCluster
+	struct SingleParticleCluster
 	{
 		Acts::Surface const* hitSurface = nullptr;
 		
@@ -42,9 +42,25 @@ private:
 		std::shared_ptr<Acts::ProcessVertex> pVertex;
 		
 	};
+	// TODO: config und constructor, damit commoncorners rein kann
+	
+	std::vector<std::vector<SingleParticleCluster>>
+	mergeSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const;
+	
+	double
+	meanLorentzShift(const std::vector<SingleParticleCluster>& clusters) const;
+	
+	Acts::Vector2D
+	localPosition(const std::vector<SingleParticleCluster>& clusters) const;
+
+	Acts::ActsSymMatrixD<2>
+	covariance(const std::vector<SingleParticleCluster>& cluster, Acts::Vector2D mean) const;
+
+	std::vector<Acts::PlanarModuleCluster>
+	formClusters(const std::vector<SingleParticleCluster>& clusters) const;
 
 	void
-	buildClusters(FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster> planarCluster, std::vector<SingleCluster> clusters) const;
+	clusterize(FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster>& planarClusters, const std::vector<SingleParticleCluster>& clusters, const geo_id_value volumeKey, const geo_id_value layerKey, const geo_id_value moduleKey) const;
 	
 };
 
