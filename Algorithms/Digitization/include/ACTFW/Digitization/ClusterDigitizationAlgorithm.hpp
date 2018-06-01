@@ -21,28 +21,36 @@ namespace FW {
 class ClusterDigitizationAlgorithm : public FW::DigitizationAlgorithm
 {
 public:
+
+	/// @brief Collects recorded hits on surfaces, forms clusters from them and stores them on the whiteboard
+	/// @param ctx access to the whiteboard data
+	/// @return Indicator if the algorithm worked properly
 	ProcessCode
 	execute(AlgorithmContext ctx) const final override;
 	
 private:
 
+	/// @brief This structure serves as data container. It allows moving data that belongs to a single particle on a single surface through functions without using quite long arguments.
 	struct SingleParticleCluster
 	{
+		// Storage of the surface of the hit record
 		Acts::Surface const* hitSurface = nullptr;
-		
+		// Storage of the Identifier of the hit
 		Acts::GeometryID geoID;
-		
+		// Mean local x-coordinate of the hit on several digitization cells
 		double localX = 0.;
+		// Mean local y-coordinate of the hit on several digitization cells
 		double localY = 0.;
 		double totalPath = 0.;
 		double lorentzShift = 0.;
 		
+		std::vector<Acts::DigitizationStep> dSteps;
 		std::vector<Acts::DigitizationCell> usedCells;
 		
 		std::shared_ptr<Acts::ProcessVertex> pVertex;
 		
 	};
-	// TODO: config und constructor, damit commoncorners rein kann
+	// TODO: config and constructor need to be modified (e.g. for commonCorners selection of clustering)
 	
 	std::vector<std::vector<SingleParticleCluster>>
 	mergeSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const;
@@ -54,7 +62,7 @@ private:
 	localPosition(const std::vector<SingleParticleCluster>& clusters) const;
 
 	Acts::ActsSymMatrixD<2>
-	covariance(const std::vector<SingleParticleCluster>& cluster, Acts::Vector2D mean) const;
+	covariance(const std::vector<SingleParticleCluster>& clusters, const Acts::Vector2D mean) const;
 
 	std::vector<Acts::PlanarModuleCluster>
 	formClusters(const std::vector<SingleParticleCluster>& clusters) const;

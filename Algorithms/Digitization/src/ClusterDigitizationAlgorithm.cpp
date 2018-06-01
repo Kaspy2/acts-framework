@@ -26,6 +26,7 @@
 std::vector<std::vector<FW::ClusterDigitizationAlgorithm::SingleParticleCluster>>
 FW::ClusterDigitizationAlgorithm::mergeSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const
 {
+	// TODO: clusters need to be formed
 	std::vector<std::vector<SingleParticleCluster>> mergedClusters;
 	return mergedClusters;
 }
@@ -52,19 +53,40 @@ FW::ClusterDigitizationAlgorithm::localPosition(const std::vector<SingleParticle
 		locPos(1) += spc.localY;
 		totalPath += spc.totalPath;
 	}
-
-	double lorentzShift = meanLorentzShift(clusters);
-
 	locPos /= totalPath;
-	locPos(0) += lorentzShift;
 	
 	return locPos;	
 }
 
 Acts::ActsSymMatrixD<2>
-FW::ClusterDigitizationAlgorithm::covariance(const std::vector<SingleParticleCluster>& cluster, Acts::Vector2D mean) const
+FW::ClusterDigitizationAlgorithm::covariance(const std::vector<SingleParticleCluster>& clusters, const Acts::Vector2D mean) const
 {
 	Acts::ActsSymMatrixD<2> cov;
+	
+	cov << 0., 0., 0., 0.;
+	
+	double totalPath = 0;
+	unsigned int nSteps = 0;
+	
+	for(const SingleParticleCluster& spc : clusters)
+	{
+		for(auto& dStep : spc.dSteps)
+		{
+			cov(0, 0) += (dStep.stepCellCenter.x() - mean(0)) * (dStep.stepCellCenter.x() - mean(0)) * dStep.stepLength;
+			cov(1, 0) += (dStep.stepCellCenter.x() - mean(0)) * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
+			cov(1, 1) += (dStep.stepCellCenter.y() - mean(1)) * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
+			nSteps++;
+		}
+		totalPath += spc.totalPath;
+	}
+	cov(0, 1) = cov(1, 0);
+	
+	cov /= totalPath;
+	if(nSteps > 1)
+		cov /= (double) nSteps;
+	else // TODO: cell size needs to be used
+		cov << 0., 0., 0., 0.;
+	
 	return cov;
 }
 
@@ -79,6 +101,8 @@ FW::ClusterDigitizationAlgorithm::formClusters(const std::vector<SingleParticleC
 		Acts::Vector2D locPos = localPosition(mCluster);
 		
 		Acts::ActsSymMatrixD<2> cov = covariance(clusters, locPos);
+		
+		locPos(0) += meanLorentzShift(clusters);
 		
 		std::vector<Acts::DigitizationCell> usedCells;
 		std::vector<Acts::ProcessVertex> pVertex;
@@ -117,7 +141,6 @@ FW::ClusterDigitizationAlgorithm::clusterize(FW::DetectorData<geo_id_value, Acts
 						   layerKey,
 						   moduleKey,
 						   std::move(pCluster));
-// TODO: derzeit gibt es nur einen grossen cluster. Der muss noch zerteilt werden
 }
 
 FW::ProcessCode
@@ -189,17 +212,17 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
               Acts::Vector3D localDirection(
                   hitSurface.transform().inverse().linear() * momentum);
               // position
-              std::vector<Acts::DigitizationStep> dSteps
+              spc.dSteps
                   = m_cfg.planarModuleStepper->cellSteps(*hitDigitizationModule,
                                                          localIntersection,
                                                          localDirection.unit());
               // everything under threshold or edge effects
-              if (!dSteps.size()) continue;
+              if (!spc.dSteps.size()) continue;
               /// let' create a cluster - centroid method
               // the cells to be used
-              spc.usedCells.reserve(dSteps.size());
+              spc.usedCells.reserve(spc.dSteps.size());
               // loop over the steps
-              for (auto dStep : dSteps) {
+              for (auto dStep : spc.dSteps) {
                 // @todo implement smearing
                 spc.localX += dStep.stepLength * dStep.stepCellCenter.x();
                 spc.localY += dStep.stepLength * dStep.stepCellCenter.y();
@@ -219,10 +242,6 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
               size_t bin0          = binUtility.bin(localPosition, 0);
               size_t bin1          = binUtility.bin(localPosition, 1);
               size_t binSerialized = binUtility.serialize({bin0, bin1, 0});
-
-              // the covariance is currently set to 0.
-              //~ Acts::ActsSymMatrixD<2> cov;
-              //~ cov << 0., 0., 0., 0.;
 
               // create the indetifier
               spc.geoID.add(volumeKey, Acts::GeometryID::volume_mask);
