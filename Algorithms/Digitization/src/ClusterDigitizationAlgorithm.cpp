@@ -23,130 +23,142 @@
 #include "ACTS/Surfaces/Surface.hpp"
 #include "ACTS/Utilities/ParameterDefinitions.hpp"
 
-std::vector<std::vector<FW::ClusterDigitizationAlgorithm::SingleParticleCluster>>
-FW::ClusterDigitizationAlgorithm::mergeSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const
+std::
+    vector<std::vector<FW::ClusterDigitizationAlgorithm::SingleParticleCluster>>
+    FW::ClusterDigitizationAlgorithm::mergeSingleParticleClusters(
+        const std::vector<SingleParticleCluster>& clusters) const
 {
-	// TODO: clusters need to be formed
-	std::vector<std::vector<SingleParticleCluster>> mergedClusters;
-	return mergedClusters;
+  // TODO: clusters need to be formed
+  // TODO: Return type might needs to be changed. A particle does not need to
+  // give a cluster as output. The data can also be distributed over several
+  // clusters.
+  std::vector<std::vector<SingleParticleCluster>> mergedClusters;
+  return mergedClusters;
 }
 
 double
-FW::ClusterDigitizationAlgorithm::meanLorentzShift(const std::vector<SingleParticleCluster>& clusters) const
+FW::ClusterDigitizationAlgorithm::meanLorentzShift(
+    const std::vector<SingleParticleCluster>& clusters) const
 {
-	double meanLorentzShift = 0.;
-	for(const SingleParticleCluster& spc : clusters)
-		meanLorentzShift += spc.lorentzShift;
-		
-	return meanLorentzShift / clusters.size();
+  double meanLorentzShift = 0.;
+  for (const SingleParticleCluster& spc : clusters)
+    meanLorentzShift += spc.lorentzShift;
+
+  return meanLorentzShift / clusters.size();
 }
 
 Acts::Vector2D
-FW::ClusterDigitizationAlgorithm::localPosition(const std::vector<SingleParticleCluster>& clusters) const
+FW::ClusterDigitizationAlgorithm::localPosition(
+    const std::vector<SingleParticleCluster>& clusters) const
 {
-	Acts::Vector2D locPos = Acts::Vector2D::Zero(2);
-	double totalPath = 0;
-	
-	for(const SingleParticleCluster& spc : clusters)
-	{
-		locPos(0) += spc.localX;
-		locPos(1) += spc.localY;
-		totalPath += spc.totalPath;
-	}
-	locPos /= totalPath;
-	
-	return locPos;	
+  Acts::Vector2D locPos    = Acts::Vector2D::Zero(2);
+  double         totalPath = 0;
+
+  for (const SingleParticleCluster& spc : clusters) {
+    locPos(0) += spc.localX;
+    locPos(1) += spc.localY;
+    totalPath += spc.totalPath;
+  }
+  locPos /= totalPath;
+
+  return locPos;
 }
 
 Acts::ActsSymMatrixD<2>
-FW::ClusterDigitizationAlgorithm::covariance(const std::vector<SingleParticleCluster>& clusters, const Acts::Vector2D mean) const
+FW::ClusterDigitizationAlgorithm::covariance(
+    const std::vector<SingleParticleCluster>& clusters,
+    const Acts::Vector2D                      mean) const
 {
-	Acts::ActsSymMatrixD<2> cov;
-	
-	cov << 0., 0., 0., 0.;
-	
-	double totalPath = 0;
-	unsigned int nSteps = 0;
-	
-	for(const SingleParticleCluster& spc : clusters)
-	{
-		for(auto& dStep : spc.dSteps)
-		{
-			cov(0, 0) += (dStep.stepCellCenter.x() - mean(0)) * (dStep.stepCellCenter.x() - mean(0)) * dStep.stepLength;
-			cov(1, 0) += (dStep.stepCellCenter.x() - mean(0)) * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
-			cov(1, 1) += (dStep.stepCellCenter.y() - mean(1)) * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
-			nSteps++;
-		}
-		totalPath += spc.totalPath;
-	}
-	cov(0, 1) = cov(1, 0);
-	
-	cov /= totalPath;
-	if(nSteps > 1)
-		cov /= (double) nSteps;
-	else // TODO: cell size needs to be used
-		cov << 0., 0., 0., 0.;
-	
-	return cov;
+  Acts::ActsSymMatrixD<2> cov;
+
+  cov << 0., 0., 0., 0.;
+
+  double       totalPath = 0;
+  unsigned int nSteps    = 0;
+
+  for (const SingleParticleCluster& spc : clusters) {
+    for (auto& dStep : spc.dSteps) {
+      cov(0, 0) += (dStep.stepCellCenter.x() - mean(0))
+          * (dStep.stepCellCenter.x() - mean(0)) * dStep.stepLength;
+      cov(1, 0) += (dStep.stepCellCenter.x() - mean(0))
+          * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
+      cov(1, 1) += (dStep.stepCellCenter.y() - mean(1))
+          * (dStep.stepCellCenter.y() - mean(1)) * dStep.stepLength;
+      nSteps++;
+    }
+    totalPath += spc.totalPath;
+  }
+  cov(0, 1) = cov(1, 0);
+
+  cov /= totalPath;
+  if (nSteps > 1)
+    cov /= (double)nSteps;
+  else  // TODO: cell size needs to be used
+    cov << 0., 0., 0., 0.;
+
+  return cov;
 }
 
 std::vector<Acts::PlanarModuleCluster>
-FW::ClusterDigitizationAlgorithm::formClusters(const std::vector<SingleParticleCluster>& clusters) const
+FW::ClusterDigitizationAlgorithm::formClusters(
+    const std::vector<SingleParticleCluster>& clusters) const
 {
-	std::vector<std::vector<SingleParticleCluster>> mergedClusters = mergeSingleParticleClusters(clusters);
-	std::vector<Acts::PlanarModuleCluster> pClusters;
-	
-	for(auto& mCluster : mergedClusters)
-	{
-		Acts::Vector2D locPos = localPosition(mCluster);
-		
-		Acts::ActsSymMatrixD<2> cov = covariance(clusters, locPos);
-		
-		locPos(0) += meanLorentzShift(clusters);
-		
-		std::vector<Acts::DigitizationCell> usedCells;
-		std::vector<Acts::ProcessVertex> pVertex;
-		
-		for(SingleParticleCluster& spc : mCluster)
-		{
-			usedCells.insert(usedCells.end(), spc.usedCells.begin(), spc.usedCells.end());
-			pVertex.push_back(*(spc.pVertex));
-		}
-		
-		  // create the planar cluster
-		  pClusters.push_back(Acts::PlanarModuleCluster(*(mCluster[0].hitSurface),
-											 Identifier(mCluster[0].geoID.value()),
-											 std::move(cov),
-											 locPos(0),
-											 locPos(1),
-											 std::move(usedCells),
-											 pVertex));
-	}
-	
-	return std::move(pClusters);
+  std::vector<std::vector<SingleParticleCluster>> mergedClusters
+      = mergeSingleParticleClusters(clusters);
+  std::vector<Acts::PlanarModuleCluster> pClusters;
+
+  for (auto& mCluster : mergedClusters) {
+    Acts::Vector2D locPos = localPosition(mCluster);
+
+    Acts::ActsSymMatrixD<2> cov = covariance(clusters, locPos);
+
+    locPos(0) += meanLorentzShift(clusters);
+
+    std::vector<Acts::DigitizationCell> usedCells;
+    std::vector<Acts::ProcessVertex>    pVertex;
+
+    for (SingleParticleCluster& spc : mCluster) {
+      usedCells.insert(
+          usedCells.end(), spc.usedCells.begin(), spc.usedCells.end());
+      pVertex.push_back(*(spc.pVertex));
+    }
+
+    // create the planar cluster
+    pClusters.push_back(
+        Acts::PlanarModuleCluster(*(mCluster[0].hitSurface),
+                                  Identifier(mCluster[0].geoID.value()),
+                                  std::move(cov),
+                                  locPos(0),
+                                  locPos(1),
+                                  std::move(usedCells),
+                                  pVertex));
+  }
+
+  return std::move(pClusters);
 }
 
 void
-FW::ClusterDigitizationAlgorithm::clusterize(FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster>& planarClusters, const std::vector<SingleParticleCluster>& clusters, const geo_id_value volumeKey, const geo_id_value layerKey, const geo_id_value moduleKey) const
+FW::ClusterDigitizationAlgorithm::clusterize(
+    FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster>& planarClusters,
+    const std::vector<SingleParticleCluster>& clusters,
+    const geo_id_value                        volumeKey,
+    const geo_id_value                        layerKey,
+    const geo_id_value                        moduleKey) const
 {
-	if(clusters.empty())
-		return;
-	
-	std::vector<Acts::PlanarModuleCluster> pClusters = formClusters(clusters);
-	
-	for(Acts::PlanarModuleCluster pCluster : pClusters)
-	      // insert into the cluster map
-		  FW::Data::insert(planarClusters,
-						   volumeKey,
-						   layerKey,
-						   moduleKey,
-						   std::move(pCluster));
+  if (clusters.empty()) return;
+
+  std::vector<Acts::PlanarModuleCluster> pClusters = formClusters(clusters);
+
+  for (Acts::PlanarModuleCluster pCluster : pClusters)
+    // insert into the cluster map
+    FW::Data::insert(
+        planarClusters, volumeKey, layerKey, moduleKey, std::move(pCluster));
 }
 
 FW::ProcessCode
 FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
 {
- // prepare the input data
+  // prepare the input data
   const FW::DetectorData<geo_id_value,
                          std::pair<std::unique_ptr<const Acts::TrackParameters>,
                                    barcode_type>>* hitData
@@ -180,9 +192,9 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
         auto moduleKey = sData.first;
         ACTS_DEBUG("-- Processing Module Data collection for module with ID "
                    << moduleKey);
-                   
+
         std::vector<SingleParticleCluster> clusters;
-        
+
         // get the hit parameters
         for (auto& hit : sData.second) {
           auto hitParameters   = hit.first.get();
@@ -195,13 +207,13 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
             // get the digitization module
             auto hitDigitizationModule = hitDetElement->digitizationModule();
             if (hitDigitizationModule) {
-				struct SingleParticleCluster spc;
-				spc.hitSurface = &hitSurface;
-				
+              struct SingleParticleCluster spc;
+              spc.hitSurface = &hitSurface;
+
               // get the lorentz angle
               double lorentzAngle = hitDigitizationModule->lorentzAngle();
               double thickness    = hitDetElement->thickness();
-              spc.lorentzShift = thickness * tan(lorentzAngle);
+              spc.lorentzShift    = thickness * tan(lorentzAngle);
               spc.lorentzShift *= -(hitDigitizationModule->readoutDirection());
               // parameters
               auto           pars     = hitParameters->parameters();
@@ -237,7 +249,9 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
               const Acts::Segmentation& segmentation
                   = hitDigitizationModule->segmentation();
               auto           binUtility = segmentation.binUtility();
-              Acts::Vector2D localPosition(spc.localX / spc.totalPath + spc.lorentzShift, spc.localY / spc.totalPath);
+              Acts::Vector2D localPosition(spc.localX / spc.totalPath
+                                               + spc.lorentzShift,
+                                           spc.localY / spc.totalPath);
               // @todo remove unneccesary conversion
               size_t bin0          = binUtility.bin(localPosition, 0);
               size_t bin1          = binUtility.bin(localPosition, 1);
@@ -252,8 +266,8 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
               Acts::ParticleProperties pProperties(
                   momentum, pMasses.mass[Acts::muon], 1., 13, particleBarcode);
               // the associated process vertex
-              spc.pVertex = std::make_shared<Acts::ProcessVertex>(Acts::ProcessVertex(position, 0., 0, {pProperties}, {}));
-
+              spc.pVertex = std::make_shared<Acts::ProcessVertex>(
+                  Acts::ProcessVertex(position, 0., 0, {pProperties}, {}));
 
               // insert into the space point map
               FW::Data::insert(spacePoints,
@@ -261,18 +275,18 @@ FW::ClusterDigitizationAlgorithm::execute(FW::AlgorithmContext ctx) const
                                layerKey,
                                moduleKey,
                                hitParameters->position());
-                               
-				clusters.push_back(spc);
+
+              clusters.push_back(spc);
 
             }  // hit moulde proection
           }    // hit element protection
         }      // hit loop
-        
+
         clusterize(planarClusters, clusters, volumeKey, layerKey, moduleKey);
-        
-      }        // moudle loop
-    }          // layer loop
-  }            // volume loop
+
+      }  // moudle loop
+    }    // layer loop
+  }      // volume loop
 
   // write the SpacePoints to the EventStore
   if (ctx.eventStore.add(m_cfg.spacePointsCollection, std::move(spacePoints))
