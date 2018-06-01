@@ -43,9 +43,9 @@ public:
                         Acts::Logging::Level level = Acts::Logging::INFO);
 
   FW::ProcessCode
-  execute(FW::AlgorithmContext ctx) const final override;
+  execute(FW::AlgorithmContext ctx) const override;
 
-private:
+protected:
   Config m_cfg;
 };
 
