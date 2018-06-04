@@ -56,21 +56,25 @@ private:
   // TODO: config and constructor need to be modified (e.g. for commonCorners
   // selection of clustering)
 
-  /// @brief Splits SingleParticleCluster elements if the used cells of a single particle are not neighbours
+  /// @brief Splits SingleParticleCluster elements if the used cells of a single
+  /// particle are not neighbours
   /// @param clusters collection of data about particles interacting with the
   /// surface
   /// @return Splitted collection
   std::vector<SingleParticleCluster>
-  divideSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const;
+  divideSingleParticleClusters(
+      const std::vector<SingleParticleCluster>& clusters) const;
 
   /// @brief Searches for common edges between two lists of digitization cells
   /// @param cluster1 data container that stores the first list
   /// @param cluster2 data container that stores the second list
   /// @return Boolean statement if a common edge exists
-  /// @note This function underlies the assumption that each digitization cell in a cluster is neighboured
+  /// @note This function underlies the assumption that each digitization cell
+  /// in a cluster is neighboured
   bool
-  commonEdge(const SingleParticleCluster& cluster1, const SingleParticleCluster& cluster2) const;
-  
+  commonEdge(const SingleParticleCluster& cluster1,
+             const SingleParticleCluster& cluster2) const;
+
   /// @brief Merges the hits of several particles to clusters
   /// @param clusters collection of data about particles interacting with the
   /// surface
