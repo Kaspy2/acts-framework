@@ -23,16 +23,86 @@
 #include "ACTS/Surfaces/Surface.hpp"
 #include "ACTS/Utilities/ParameterDefinitions.hpp"
 
+std::vector<FW::ClusterDigitizationAlgorithm::SingleParticleCluster>
+FW::ClusterDigitizationAlgorithm::divideSingleParticleClusters(const std::vector<SingleParticleCluster>& clusters) const
+{
+	std::vector<SingleParticleCluster> resolvedClusters;
+	
+  bool commonEdge;  
+  unsigned int clusterSize = clusters.size();
+  
+  for(unsigned int i = 0; i < clusterSize; i++)
+	for(unsigned int j = 0; j < clusters[i].usedCells.size(); j++)
+	{
+		commonEdge = false;
+		for(unsigned int k = 0; k < clusters[i].usedCells.size(); k++)
+		{
+			if(j == k)
+				continue;
+			if((clusters[i].usedCells[k].channel0 == clusters[i].usedCells[j].channel0 - 1
+				|| clusters[i].usedCells[k].channel0 == clusters[i].usedCells[j].channel0
+				|| clusters[i].usedCells[k].channel0 == clusters[i].usedCells[j].channel0 + 1)
+				&& (clusters[i].usedCells[k].channel1 >= clusters[i].usedCells[j].channel1 - 1
+				|| clusters[i].usedCells[k].channel1 >= clusters[i].usedCells[j].channel1
+				|| clusters[i].usedCells[k].channel1 >= clusters[i].usedCells[j].channel1 + 1))
+			{
+				commonEdge = true;
+				break;
+			}
+		}
+		if(!commonEdge)
+		{
+				SingleParticleCluster tmpSc = clusters[i];
+				tmpSc.usedCells.clear();
+				tmpSc.usedCells.push_back(clusters[i].usedCells[j]);
+				resolvedClusters.push_back(tmpSc);
+				resolvedClusters.push_back(clusters[i]);
+				resolvedClusters.back().usedCells.erase(resolvedClusters.back().usedCells.begin() + j);
+		}	
+	}
+	return std::move(resolvedClusters);
+}
+  
+bool
+FW::ClusterDigitizationAlgorithm::commonEdge(const SingleParticleCluster& cluster1, const SingleParticleCluster& cluster2) const
+{
+	for(auto& uC1 : cluster1.usedCells)
+		for(auto& uC2 : cluster2.usedCells)
+			if((uC1.channel0 == uC2.channel0 - 1
+			   || uC1.channel0 == uC2.channel0
+			   || uC1.channel0 == uC2.channel0 + 1)
+			   &&(uC1.channel1 == uC2.channel1 - 1
+		       || uC1.channel1 == uC2.channel1
+		       || uC1.channel1 == uC2.channel1 + 1))
+				return true;
+	return false;
+}
+  
 std::
     vector<std::vector<FW::ClusterDigitizationAlgorithm::SingleParticleCluster>>
     FW::ClusterDigitizationAlgorithm::mergeSingleParticleClusters(
         const std::vector<SingleParticleCluster>& clusters) const
 {
-  // TODO: clusters need to be formed
-  // TODO: Return type might needs to be changed. A particle does not need to
-  // give a cluster as output. The data can also be distributed over several
-  // clusters.
+  std::vector<SingleParticleCluster> resolvedClusters = divideSingleParticleClusters(clusters);
+  
   std::vector<std::vector<SingleParticleCluster>> mergedClusters;
+  std::vector<unsigned int> mergedIndices;
+  
+  for(unsigned int i = 0; i < resolvedClusters.size(); i++)
+  {
+	mergedClusters.push_back({{resolvedClusters[i]}});
+	for(unsigned int j = i + 1; j < resolvedClusters.size(); j++)
+		if(commonEdge(resolvedClusters[i], resolvedClusters[j]))
+		{
+			mergedClusters.back().push_back(resolvedClusters[j]);
+			mergedIndices.push_back(j);
+		}
+	std::vector<unsigned int>::reverse_iterator rit = mergedIndices.rbegin();
+	for(; rit != mergedIndices.rend(); ++rit)
+		resolvedClusters.erase(resolvedClusters.begin() + *rit);
+	mergedIndices.clear();
+  }
+  
   return mergedClusters;
 }
 
