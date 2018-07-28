@@ -7,10 +7,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "DetUtils.h"
-#include "ACTS/Surfaces/PlanarBounds.hpp"
-#include "ACTS/Surfaces/RectangleBounds.hpp"
-#include "ACTS/Surfaces/TrapezoidBounds.hpp"
-#include "ACTS/Utilities/Units.hpp"
+#include "Acts/Surfaces/PlanarBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Utilities/Units.hpp"
 #include "DD4hep/CartesianGridXZ.h"
 
 namespace det {
