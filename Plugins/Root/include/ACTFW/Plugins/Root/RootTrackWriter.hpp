@@ -81,6 +81,9 @@ namespace FW {
       TTree*     m_outputTree{nullptr};    ///< The output tree
       int        m_eventNr{0};             ///< the event number
       int        m_nStates{0};             ///< number of states 
+      int        m_nPredicted{0};          ///< number of states with predicted parameter
+      int        m_nFiltered{0};           ///< number of states with filtered parameter
+      int        m_nSmoothed{0};           ///< number of states with smoothed parameter
       unsigned long m_barcode{0};          ///< Particle barcode
       std::vector<float>      m_charge;    ///< charge of track 
       std::vector<int>        m_volumeID;  ///< volume identifier

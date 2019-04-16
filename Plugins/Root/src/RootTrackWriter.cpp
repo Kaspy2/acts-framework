@@ -12,8 +12,6 @@
 #include <ios>
 #include <stdexcept>
 #include "Acts/Utilities/Helpers.hpp"
-//#include <boost/variant.hpp>
-//#include <boost/variant/static_visitor.hpp>
  
 using Acts::VectorHelpers::eta;
 using Acts::VectorHelpers::theta;
@@ -49,6 +47,9 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     // I/O parameters
     m_outputTree->Branch("event_nr", &m_eventNr);
     m_outputTree->Branch("nStates", &m_nStates);
+    m_outputTree->Branch("nPredicted", &m_nPredicted);
+    m_outputTree->Branch("nFiltered", &m_nFiltered);
+    m_outputTree->Branch("nSmoothed", &m_nSmoothed);
     m_outputTree->Branch("volume_id", &m_volumeID);
     m_outputTree->Branch("layer_id", &m_layerID);
     m_outputTree->Branch("module_id", &m_moduleID);
@@ -149,13 +150,17 @@ FW::Root::RootTrackWriter::writeT(
   for (auto& track : tracks) {
     /// collect the information
     m_barcode = track.first;
-    m_nStates = 0;
+    m_nStates = track.second.size();
+    m_nPredicted = 0;
+    m_nFiltered = 0;
+    m_nSmoothed = 0;
     for(auto& state: track.second){
+      // get the geometry ID 
       auto geoID = state.referenceSurface().geoID();
       m_volumeID.push_back(geoID.value(Acts::GeometryID::volume_mask)); 
       m_layerID.push_back(geoID.value(Acts::GeometryID::layer_mask)); 
       m_moduleID.push_back(geoID.value(Acts::GeometryID::sensitive_mask)); 
-      // get the uncalibrated measurment
+      // get the uncalibrated measurement
       auto meas = boost::get<Measurement>(*state.measurement.uncalibrated);
       // get local position 
       Acts::Vector2D local(meas.parameters()[Acts::ParDef::eLOC_0],
@@ -177,10 +182,11 @@ FW::Root::RootTrackWriter::writeT(
       bool predicted = false;
       if(state.parameter.predicted){
         predicted = true;
+        m_nPredicted++;
         auto parameter = *state.parameter.predicted;
         // push the predicted parameter 
-        m_lx_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]),
-          m_ly_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
+        m_lx_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
+        m_ly_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_resid_x_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
         m_resid_y_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
         m_x_prt.push_back(parameter.position().x());
@@ -200,10 +206,11 @@ FW::Root::RootTrackWriter::writeT(
       bool filtered = false;
       if(state.parameter.filtered){
         filtered = true;
+        m_nFiltered++;
         auto parameter = *state.parameter.filtered;
         // push the filtered parameter 
-        m_lx_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]),
-          m_ly_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
+        m_lx_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
+        m_ly_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_resid_x_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
         m_resid_y_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
         m_x_flt.push_back(parameter.position().x());
@@ -222,10 +229,11 @@ FW::Root::RootTrackWriter::writeT(
       bool smoothed = false;
       if(state.parameter.smoothed){
         smoothed = true;
+        m_nSmoothed++;
         auto parameter = *state.parameter.smoothed;
         // push the smoothed parameter 
-        m_lx_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]),
-          m_ly_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
+        m_lx_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
+        m_ly_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_resid_x_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
         m_resid_y_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
         m_x_smt.push_back(parameter.position().x());
@@ -242,7 +250,6 @@ FW::Root::RootTrackWriter::writeT(
       m_prt.push_back(predicted);
       m_flt.push_back(filtered);
       m_smt.push_back(smoothed);
-      m_nStates ++;
     }
     m_outputTree->Fill();
     // now reset
