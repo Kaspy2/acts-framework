@@ -15,6 +15,7 @@
 #include "ACTFW/Barcode/BarcodeSvc.hpp"
 #include "ACTFW/Digitization/DigitizationOptions.hpp"
 #include "ACTFW/Fatras/FatrasOptions.hpp"
+#include "ACTFW/Fitting/FittingOptions.hpp"
 #include "ACTFW/Framework/Sequencer.hpp"
 #include "ACTFW/Framework/WhiteBoard.hpp"
 #include "ACTFW/Geometry/CommonGeometry.hpp"
@@ -28,6 +29,7 @@
 #include "FatrasDigitizationBase.hpp"
 #include "FatrasEvgenBase.hpp"
 #include "FatrasSimulationBase.hpp"
+#include "FittingBase.hpp"
 
 /// @brief The Fatras example
 ///
@@ -60,6 +62,7 @@ fatrasExample(int               argc,
   FW::Options::addBFieldOptions(desc);
   FW::Options::addFatrasOptions(desc);
   FW::Options::addDigitizationOptions(desc);
+  FW::Options::addFittingOptions(desc);
   FW::Options::addOutputOptions(desc);
   desc.add_options()("evg-input-type",
                      value<std::string>()->default_value("pythia8"),
@@ -102,6 +105,9 @@ fatrasExample(int               argc,
   // Setup the evgen input to the simulation
   setupEvgenInput(vm, sequencer, barcodeSvc, randomNumberSvc);
 
+  // Get the tracking geometry
+  auto tGeometry = trackingGeometry(vm);
+
   // (B) SIMULATION
   // Setup the simulation
   setupSimulation(vm, sequencer, tGeometry, barcodeSvc, randomNumberSvc);
@@ -111,6 +117,8 @@ fatrasExample(int               argc,
   setupDigitization(vm, sequencer, barcodeSvc, randomNumberSvc);
 
   // (D) TRUTH TRACKING
+  setupFitting<po::variables_map>(
+      vm, sequencer, tGeometry, barcodeSvc);
 
   // (E) PATTERN RECOGNITION
 

@@ -1,0 +1,6 @@
+add_library(ACTFWFitting INTERFACE)
+target_include_directories(ACTFWFitting INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
+target_include_directories(ACTFWFitting INTERFACE ActsCore ACTFramework)
+
+install(TARGETS ACTFWFitting LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY include/ACTFW DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
