@@ -12,15 +12,15 @@
 #include <ios>
 #include <stdexcept>
 #include "Acts/Utilities/Helpers.hpp"
- 
+
 using Acts::VectorHelpers::eta;
 using Acts::VectorHelpers::theta;
 using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
 
 FW::Root::RootTrackWriter::RootTrackWriter(
-                                           const FW::Root::RootTrackWriter::Config& cfg,
-                                           Acts::Logging::Level                        level)
+    const FW::Root::RootTrackWriter::Config& cfg,
+    Acts::Logging::Level                     level)
   : Base(cfg.collection, "RootTrackWriter", level)
   , m_cfg(cfg)
   , m_outputFile(cfg.rootFile)
@@ -90,7 +90,7 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("eta_smt", &m_eta_smt);
     m_outputTree->Branch("phi_smt", &m_phi_smt);
     m_outputTree->Branch("pT_smt", &m_pT_smt);
- 
+
     m_outputTree->Branch("filtered", &m_flt);
     m_outputTree->Branch("l_x_flt", &m_lx_flt);
     m_outputTree->Branch("l_y_flt", &m_ly_flt);
@@ -106,7 +106,7 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("eta_flt", &m_eta_flt);
     m_outputTree->Branch("phi_flt", &m_phi_flt);
     m_outputTree->Branch("pT_flt", &m_pT_flt);
- 
+
     m_outputTree->Branch("charge", &m_charge);
     m_outputTree->Branch("barcode", &m_barcode, "barcode/l");
   }
@@ -126,16 +126,15 @@ FW::Root::RootTrackWriter::endRun()
     m_outputFile->cd();
     m_outputTree->Write();
     ACTS_INFO("Wrote particles to tree '" << m_cfg.treeName << "' in '"
-              << m_cfg.filePath
-              << "'");
+                                          << m_cfg.filePath
+                                          << "'");
   }
   return ProcessCode::SUCCESS;
 }
 
 FW::ProcessCode
-FW::Root::RootTrackWriter::writeT(
-                                  const AlgorithmContext&               ctx,
-                                  const TrackMap&                       tracks)
+FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
+                                  const TrackMap&         tracks)
 {
 
   if (m_outputFile == nullptr) return ProcessCode::SUCCESS;
@@ -149,46 +148,48 @@ FW::Root::RootTrackWriter::writeT(
   // loop over the process vertices
   for (auto& track : tracks) {
     /// collect the information
-    m_barcode = track.first;
-    m_nStates = track.second.size();
+    m_barcode    = track.first;
+    m_nStates    = track.second.size();
     m_nPredicted = 0;
-    m_nFiltered = 0;
-    m_nSmoothed = 0;
-    for(auto& state: track.second){
-      // get the geometry ID 
+    m_nFiltered  = 0;
+    m_nSmoothed  = 0;
+    for (auto& state : track.second) {
+      // get the geometry ID
       auto geoID = state.referenceSurface().geoID();
-      m_volumeID.push_back(geoID.value(Acts::GeometryID::volume_mask)); 
-      m_layerID.push_back(geoID.value(Acts::GeometryID::layer_mask)); 
-      m_moduleID.push_back(geoID.value(Acts::GeometryID::sensitive_mask)); 
+      m_volumeID.push_back(geoID.value(Acts::GeometryID::volume_mask));
+      m_layerID.push_back(geoID.value(Acts::GeometryID::layer_mask));
+      m_moduleID.push_back(geoID.value(Acts::GeometryID::sensitive_mask));
       // get the uncalibrated measurement
       auto meas = boost::get<Measurement>(*state.measurement.uncalibrated);
-      // get local position 
+      // get local position
       Acts::Vector2D local(meas.parameters()[Acts::ParDef::eLOC_0],
                            meas.parameters()[Acts::ParDef::eLOC_1]);
-      // get global position 
+      // get global position
       Acts::Vector3D global(0, 0, 0);
       Acts::Vector3D mom(1, 1, 1);
       // transform local into global position information
       meas.referenceSurface().localToGlobal(local, mom, global);
-      
-      // push the measurment 
+
+      // push the measurment
       m_lx_uncalib.push_back(local.x());
       m_ly_uncalib.push_back(local.y());
       m_x_uncalib.push_back(global.x());
       m_y_uncalib.push_back(global.y());
       m_z_uncalib.push_back(global.z());
 
-      // get the predicted parameter 
+      // get the predicted parameter
       bool predicted = false;
-      if(state.parameter.predicted){
+      if (state.parameter.predicted) {
         predicted = true;
         m_nPredicted++;
         auto parameter = *state.parameter.predicted;
-        // push the predicted parameter 
+        // push the predicted parameter
         m_lx_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_ly_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
-        m_resid_x_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
-        m_resid_y_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
+        m_resid_x_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]
+                                - local.x());
+        m_resid_y_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
+                                - local.y());
         m_x_prt.push_back(parameter.position().x());
         m_y_prt.push_back(parameter.position().y());
         m_z_prt.push_back(parameter.position().z());
@@ -202,17 +203,19 @@ FW::Root::RootTrackWriter::writeT(
         m_charge.push_back(parameter.charge());
       }
 
-      // get the filtered parameter 
+      // get the filtered parameter
       bool filtered = false;
-      if(state.parameter.filtered){
+      if (state.parameter.filtered) {
         filtered = true;
         m_nFiltered++;
         auto parameter = *state.parameter.filtered;
-        // push the filtered parameter 
+        // push the filtered parameter
         m_lx_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_ly_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
-        m_resid_x_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
-        m_resid_y_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
+        m_resid_x_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]
+                                - local.x());
+        m_resid_y_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
+                                - local.y());
         m_x_flt.push_back(parameter.position().x());
         m_y_flt.push_back(parameter.position().y());
         m_z_flt.push_back(parameter.position().z());
@@ -225,17 +228,19 @@ FW::Root::RootTrackWriter::writeT(
         m_pT_flt.push_back(parameter.pT());
       }
 
-      // get the smoothed parameter 
+      // get the smoothed parameter
       bool smoothed = false;
-      if(state.parameter.smoothed){
+      if (state.parameter.smoothed) {
         smoothed = true;
         m_nSmoothed++;
         auto parameter = *state.parameter.smoothed;
-        // push the smoothed parameter 
+        // push the smoothed parameter
         m_lx_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_ly_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
-        m_resid_x_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0] - local.x());
-        m_resid_y_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1] - local.y());
+        m_resid_x_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]
+                                - local.x());
+        m_resid_y_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
+                                - local.y());
         m_x_smt.push_back(parameter.position().x());
         m_y_smt.push_back(parameter.position().y());
         m_z_smt.push_back(parameter.position().z());
@@ -294,7 +299,7 @@ FW::Root::RootTrackWriter::writeT(
     m_phi_flt.clear();
     m_eta_flt.clear();
     m_pT_flt.clear();
-    
+
     m_smt.clear();
     m_lx_smt.clear();
     m_ly_smt.clear();
