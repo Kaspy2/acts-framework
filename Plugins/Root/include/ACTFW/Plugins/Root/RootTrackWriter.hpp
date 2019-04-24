@@ -10,12 +10,17 @@
 
 #include <mutex>
 #include "ACTFW/Barcode/BarcodeSvc.hpp"
+#include "ACTFW/EventData/DataContainers.hpp"
+#include "ACTFW/EventData/SimHit.hpp"
+#include "ACTFW/EventData/SimParticle.hpp"
+#include "ACTFW/EventData/SimVertex.hpp"
 #include "ACTFW/Framework/WriterT.hpp"
 #include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/TrackState.hpp"
 #include "Acts/Utilities/GeometryID.hpp"
 #include "Acts/Utilities/ParameterDefinitions.hpp"
+#include "TEfficiency.h"
 
 class TFile;
 class TTree;
@@ -46,11 +51,12 @@ namespace Root {
     /// @brief The nested configuration struct
     struct Config
     {
-      std::string collection;             ///< track collection to write
-      std::string filePath;               ///< path of the output file
-      std::string fileMode = "RECREATE";  ///< file access mode
-      std::string treeName = "tracks";    ///< name of the output tree
-      TFile*      rootFile = nullptr;     ///< common root file
+      std::string trackCollection;           ///< track collection to write
+      std::string simulatedEventCollection;  ///< truth particle collection
+      std::string filePath;                  ///< path of the output file
+      std::string fileMode = "RECREATE";     ///< file access mode
+      std::string treeName = "tracks";       ///< name of the output tree
+      TFile*      rootFile = nullptr;        ///< common root file
     };
 
     /// Constructor
@@ -70,7 +76,7 @@ namespace Root {
   protected:
     /// @brief Write method called by the base class
     /// @param [in] ctx is the algorithm context for event information
-    /// @param [in] tracks is what to be written out
+    /// @param [in] tracks are what to be written out
     ProcessCode
     writeT(const AlgorithmContext& ctx, const TrackMap& tracks) final override;
 
@@ -80,12 +86,21 @@ namespace Root {
     TFile*     m_outputFile{nullptr};  ///< The output file
     TTree*     m_outputTree{nullptr};  ///< The output tree
     int        m_eventNr{0};           ///< the event number
-    int        m_nStates{0};           ///< number of states
-    int        m_nPredicted{0};  ///< number of states with predicted parameter
-    int        m_nFiltered{0};   ///< number of states with filtered parameter
-    int        m_nSmoothed{0};   ///< number of states with smoothed parameter
-    unsigned long      m_barcode{0};  ///< Particle barcode
-    std::vector<float> m_charge;      ///< charge of track
+
+    unsigned long m_t_barcode{0};  ///< Truth particle barcode
+    float         m_t_charge;      ///< Truth particle charge
+    float         m_t_vx;          ///< Truth particle vertex x
+    float         m_t_vy;          ///< Truth particle vertex y
+    float         m_t_vz;          ///< Truth particle vertex z
+    float         m_t_ipx;         ///< Truth particle initial momentum px
+    float         m_t_ipy;         ///< Truth particle initial momentum py
+    float         m_t_ipz;         ///< Truth particle initial momentum pz
+    float         m_t_itheta;      ///< Truth particle initial momentum theta
+    float         m_t_iphi;        ///< Truth particle initial momentum phi
+    float         m_t_ieta;        ///< Truth particle initial momentum eta
+    float         m_t_ipT;         ///< Truth particle initial momentum pT
+
+    int                m_nStates{0};  ///< number of states
     std::vector<int>   m_volumeID;    ///< volume identifier
     std::vector<int>   m_layerID;     ///< layer identifier
     std::vector<int>   m_moduleID;    ///< surface identifier
@@ -95,53 +110,62 @@ namespace Root {
     std::vector<float> m_y_uncalib;   ///< uncalibrated measurement global y
     std::vector<float> m_z_uncalib;   ///< uncalibrated measurement global y
 
-    std::vector<bool>  m_prt;          ///< predicted status
-    std::vector<float> m_lx_prt;       ///< predicted local x
-    std::vector<float> m_ly_prt;       ///< predicted local y
+    int m_nPredicted{0};          ///< number of states with predicted parameter
+    std::vector<bool>  m_prt;     ///< predicted status
+    std::vector<float> m_lx_prt;  ///< predicted local x
+    std::vector<float> m_ly_prt;  ///< predicted local y
     std::vector<float> m_resid_x_prt;  ///< residual x from predicted
     std::vector<float> m_resid_y_prt;  ///< residual y from predicted
+    std::vector<float> m_pull_x_prt;   ///< pull x from predicted
+    std::vector<float> m_pull_y_prt;   ///< pull y from predicted
     std::vector<float> m_x_prt;        ///< predicted global x
     std::vector<float> m_y_prt;        ///< predicted global y
     std::vector<float> m_z_prt;        ///< predicted global z
     std::vector<float> m_px_prt;       ///< predicted momentum px
     std::vector<float> m_py_prt;       ///< predicted momentum py
     std::vector<float> m_pz_prt;       ///< predicted momentum pz
-    std::vector<float> m_theta_prt;    ///< predicted parameter theta
-    std::vector<float> m_eta_prt;      ///< predicted parameter eta
-    std::vector<float> m_phi_prt;      ///< predicted parameter phi
-    std::vector<float> m_pT_prt;       ///< predicted parameter pT
+    std::vector<float> m_theta_prt;    ///< predicted momentum theta
+    std::vector<float> m_eta_prt;      ///< predicted momentum eta
+    std::vector<float> m_phi_prt;      ///< predicted momentum phi
+    std::vector<float> m_pT_prt;       ///< predicted momentum pT
 
-    std::vector<bool>  m_flt;          ///< filtered status
-    std::vector<float> m_lx_flt;       ///< filtered local x
-    std::vector<float> m_ly_flt;       ///< filtered local y
+    int m_nFiltered{0};           ///< number of states with filtered parameter
+    std::vector<bool>  m_flt;     ///< filtered status
+    std::vector<float> m_lx_flt;  ///< filtered local x
+    std::vector<float> m_ly_flt;  ///< filtered local y
     std::vector<float> m_resid_x_flt;  ///< residual x from filtered
     std::vector<float> m_resid_y_flt;  ///< residual y from filtered
+    std::vector<float> m_pull_x_flt;   ///< pull x from filtered
+    std::vector<float> m_pull_y_flt;   ///< pull y from filtered
     std::vector<float> m_x_flt;        ///< filtered global x
     std::vector<float> m_y_flt;        ///< filtered global y
     std::vector<float> m_z_flt;        ///< filtered global z
     std::vector<float> m_px_flt;       ///< filtered momentum px
     std::vector<float> m_py_flt;       ///< filtered momentum py
     std::vector<float> m_pz_flt;       ///< filtered momentum pz
-    std::vector<float> m_theta_flt;    ///< filtered parameter theta
-    std::vector<float> m_eta_flt;      ///< filtered parameter eta
-    std::vector<float> m_phi_flt;      ///< filtered parameter phi
-    std::vector<float> m_pT_flt;       ///< filtered parameter pT
+    std::vector<float> m_theta_flt;    ///< filtered momentum theta
+    std::vector<float> m_eta_flt;      ///< filtered momentum eta
+    std::vector<float> m_phi_flt;      ///< filtered momentum phi
+    std::vector<float> m_pT_flt;       ///< filtered momentum pT
 
-    std::vector<bool>  m_smt;          ///< smoothed status
-    std::vector<float> m_lx_smt;       ///< smoothed local x
-    std::vector<float> m_ly_smt;       ///< smoothed local y
+    int m_nSmoothed{0};           ///< number of states with smoothed parameter
+    std::vector<bool>  m_smt;     ///< smoothed status
+    std::vector<float> m_lx_smt;  ///< smoothed local x
+    std::vector<float> m_ly_smt;  ///< smoothed local y
     std::vector<float> m_resid_x_smt;  ///< residual x from smoothed
     std::vector<float> m_resid_y_smt;  ///< residual y from smoothed
+    std::vector<float> m_pull_x_smt;   ///< pull x from filtered
+    std::vector<float> m_pull_y_smt;   ///< pull y from filtered
     std::vector<float> m_x_smt;        ///< smoothed global x
     std::vector<float> m_y_smt;        ///< smoothed global y
     std::vector<float> m_z_smt;        ///< smoothed global z
     std::vector<float> m_px_smt;       ///< smoothed momentum px
     std::vector<float> m_py_smt;       ///< smoothed momentum py
     std::vector<float> m_pz_smt;       ///< smoothed momentum pz
-    std::vector<float> m_theta_smt;    ///< smoothed parameter theta
-    std::vector<float> m_eta_smt;      ///< smoothed parameter eta
-    std::vector<float> m_phi_smt;      ///< smoothed parameter phi
-    std::vector<float> m_pT_smt;       ///< smoothed parameter pT
+    std::vector<float> m_theta_smt;    ///< smoothed momentum theta
+    std::vector<float> m_eta_smt;      ///< smoothed momentum eta
+    std::vector<float> m_phi_smt;      ///< smoothed momentum phi
+    std::vector<float> m_pT_smt;       ///< smoothed momentum pT
   };
 
 }  // namespace Root

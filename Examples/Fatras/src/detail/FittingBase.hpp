@@ -94,7 +94,9 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
   std::shared_ptr<FW::Root::RootTrackWriter> tWriterRoot = nullptr;
   if (vm["output-root"].template as<bool>()) {
     FW::Root::RootTrackWriter::Config tWriterRootConfig;
-    tWriterRootConfig.collection = fittingConfig.trackCollection;
+    tWriterRootConfig.trackCollection = fittingConfig.trackCollection;
+    tWriterRootConfig.simulatedEventCollection
+        = fittingConfig.simulatedEventCollection;
     tWriterRootConfig.filePath
         = FW::joinPaths(outputDir, fittingConfig.trackCollection + ".root");
     tWriterRootConfig.treeName = fittingConfig.trackCollection;

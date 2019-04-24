@@ -21,13 +21,15 @@ using Acts::VectorHelpers::perp;
 FW::Root::RootTrackWriter::RootTrackWriter(
     const FW::Root::RootTrackWriter::Config& cfg,
     Acts::Logging::Level                     level)
-  : Base(cfg.collection, "RootTrackWriter", level)
+  : Base(cfg.trackCollection, "RootTrackWriter", level)
   , m_cfg(cfg)
   , m_outputFile(cfg.rootFile)
 {
   // An input collection name and tree name must be specified
-  if (m_cfg.collection.empty()) {
-    throw std::invalid_argument("Missing input collection");
+  if (m_cfg.trackCollection.empty()) {
+    throw std::invalid_argument("Missing input track collection");
+  } else if (m_cfg.simulatedEventCollection.empty()) {
+    throw std::invalid_argument("Missing input particle collection");
   } else if (m_cfg.treeName.empty()) {
     throw std::invalid_argument("Missing tree name");
   }
@@ -46,10 +48,20 @@ FW::Root::RootTrackWriter::RootTrackWriter(
   else {
     // I/O parameters
     m_outputTree->Branch("event_nr", &m_eventNr);
+    m_outputTree->Branch("t_barcode", &m_t_barcode, "t_barcode/l");
+    m_outputTree->Branch("t_charge", &m_t_charge);
+    m_outputTree->Branch("t_vx", &m_t_vx);
+    m_outputTree->Branch("t_vy", &m_t_vy);
+    m_outputTree->Branch("t_vz", &m_t_vz);
+    m_outputTree->Branch("t_ipx", &m_t_ipx);
+    m_outputTree->Branch("t_ipy", &m_t_ipy);
+    m_outputTree->Branch("t_ipz", &m_t_ipz);
+    m_outputTree->Branch("t_itheta", &m_t_itheta);
+    m_outputTree->Branch("t_iphi", &m_t_iphi);
+    m_outputTree->Branch("t_ieta", &m_t_ieta);
+    m_outputTree->Branch("t_ipT", &m_t_ipT);
+
     m_outputTree->Branch("nStates", &m_nStates);
-    m_outputTree->Branch("nPredicted", &m_nPredicted);
-    m_outputTree->Branch("nFiltered", &m_nFiltered);
-    m_outputTree->Branch("nSmoothed", &m_nSmoothed);
     m_outputTree->Branch("volume_id", &m_volumeID);
     m_outputTree->Branch("layer_id", &m_layerID);
     m_outputTree->Branch("module_id", &m_moduleID);
@@ -59,11 +71,14 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("g_y_uncalib", &m_y_uncalib);
     m_outputTree->Branch("g_z_uncalib", &m_z_uncalib);
 
+    m_outputTree->Branch("nPredicted", &m_nPredicted);
     m_outputTree->Branch("predicted", &m_prt);
     m_outputTree->Branch("l_x_prt", &m_lx_prt);
     m_outputTree->Branch("l_y_prt", &m_ly_prt);
     m_outputTree->Branch("resid_x_prt", &m_resid_x_prt);
     m_outputTree->Branch("resid_y_prt", &m_resid_y_prt);
+    m_outputTree->Branch("pull_x_prt", &m_pull_x_prt);
+    m_outputTree->Branch("pull_y_prt", &m_pull_y_prt);
     m_outputTree->Branch("g_x_prt", &m_x_prt);
     m_outputTree->Branch("g_y_prt", &m_y_prt);
     m_outputTree->Branch("g_z_prt", &m_z_prt);
@@ -75,27 +90,14 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("phi_prt", &m_phi_prt);
     m_outputTree->Branch("pT_prt", &m_pT_prt);
 
-    m_outputTree->Branch("smoothed", &m_smt);
-    m_outputTree->Branch("l_x_smt", &m_lx_smt);
-    m_outputTree->Branch("l_y_smt", &m_ly_smt);
-    m_outputTree->Branch("resid_x_smt", &m_resid_x_smt);
-    m_outputTree->Branch("resid_y_smt", &m_resid_y_smt);
-    m_outputTree->Branch("g_x_smt", &m_x_smt);
-    m_outputTree->Branch("g_y_smt", &m_y_smt);
-    m_outputTree->Branch("g_z_smt", &m_z_smt);
-    m_outputTree->Branch("px_smt", &m_px_smt);
-    m_outputTree->Branch("py_smt", &m_py_smt);
-    m_outputTree->Branch("pz_smt", &m_pz_smt);
-    m_outputTree->Branch("theta_smt", &m_theta_smt);
-    m_outputTree->Branch("eta_smt", &m_eta_smt);
-    m_outputTree->Branch("phi_smt", &m_phi_smt);
-    m_outputTree->Branch("pT_smt", &m_pT_smt);
-
+    m_outputTree->Branch("nFiltered", &m_nFiltered);
     m_outputTree->Branch("filtered", &m_flt);
     m_outputTree->Branch("l_x_flt", &m_lx_flt);
     m_outputTree->Branch("l_y_flt", &m_ly_flt);
     m_outputTree->Branch("resid_x_flt", &m_resid_x_flt);
     m_outputTree->Branch("resid_y_flt", &m_resid_y_flt);
+    m_outputTree->Branch("pull_x_flt", &m_pull_x_flt);
+    m_outputTree->Branch("pull_y_flt", &m_pull_y_flt);
     m_outputTree->Branch("g_x_flt", &m_x_flt);
     m_outputTree->Branch("g_y_flt", &m_y_flt);
     m_outputTree->Branch("g_z_flt", &m_z_flt);
@@ -107,8 +109,24 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("phi_flt", &m_phi_flt);
     m_outputTree->Branch("pT_flt", &m_pT_flt);
 
-    m_outputTree->Branch("charge", &m_charge);
-    m_outputTree->Branch("barcode", &m_barcode, "barcode/l");
+    m_outputTree->Branch("nSmoothed", &m_nSmoothed);
+    m_outputTree->Branch("smoothed", &m_smt);
+    m_outputTree->Branch("l_x_smt", &m_lx_smt);
+    m_outputTree->Branch("l_y_smt", &m_ly_smt);
+    m_outputTree->Branch("resid_x_smt", &m_resid_x_smt);
+    m_outputTree->Branch("resid_y_smt", &m_resid_y_smt);
+    m_outputTree->Branch("pull_x_smt", &m_pull_x_smt);
+    m_outputTree->Branch("pull_y_smt", &m_pull_y_smt);
+    m_outputTree->Branch("g_x_smt", &m_x_smt);
+    m_outputTree->Branch("g_y_smt", &m_y_smt);
+    m_outputTree->Branch("g_z_smt", &m_z_smt);
+    m_outputTree->Branch("px_smt", &m_px_smt);
+    m_outputTree->Branch("py_smt", &m_py_smt);
+    m_outputTree->Branch("pz_smt", &m_pz_smt);
+    m_outputTree->Branch("theta_smt", &m_theta_smt);
+    m_outputTree->Branch("eta_smt", &m_eta_smt);
+    m_outputTree->Branch("phi_smt", &m_phi_smt);
+    m_outputTree->Branch("pT_smt", &m_pT_smt);
   }
 }
 
@@ -125,9 +143,9 @@ FW::Root::RootTrackWriter::endRun()
   if (m_outputFile) {
     m_outputFile->cd();
     m_outputTree->Write();
-    ACTS_INFO("Wrote particles to tree '" << m_cfg.treeName << "' in '"
-                                          << m_cfg.filePath
-                                          << "'");
+    ACTS_INFO("Wrote tracks to tree '" << m_cfg.treeName << "' in '"
+                                       << m_cfg.filePath
+                                       << "'");
   }
   return ProcessCode::SUCCESS;
 }
@@ -139,16 +157,62 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
 
   if (m_outputFile == nullptr) return ProcessCode::SUCCESS;
 
+  // Read truth particles from input collection
+  const std::vector<FW::Data::SimVertex<>>* simulatedEvent = nullptr;
+  if (ctx.eventStore.get(m_cfg.simulatedEventCollection, simulatedEvent)
+      == FW::ProcessCode::ABORT) {
+    throw std::ios_base::failure("Retrieve truth particle collection "
+                                 + m_cfg.simulatedEventCollection
+                                 + " failure!");
+  }
+
+  ACTS_DEBUG("Read collection '" << m_cfg.simulatedEventCollection << "' with "
+                                 << simulatedEvent->size()
+                                 << " vertices");
+
+  // Get the position and momentum of the truth particle
+  ACTS_DEBUG("Get position and momentum of the truth particle ");
+  std::map<barcode_type, std::pair<Acts::Vector3D, Acts::Vector3D>> posmomMap;
+  std::map<barcode_type, float> chargeMap;
+  for (auto& vertex : *simulatedEvent) {
+    for (auto& particle : vertex.outgoing()) {
+      std::pair<Acts::Vector3D, Acts::Vector3D> posmom(particle.position(),
+                                                       particle.momentum());
+      posmomMap.insert(std::make_pair(particle.barcode(), posmom));
+      chargeMap.insert(std::make_pair(particle.barcode(), particle.q()));
+    }
+  }
+
   // Exclusive access to the tree while writing
   std::lock_guard<std::mutex> lock(m_writeMutex);
 
   // Get the event number
   m_eventNr = ctx.eventNumber;
 
-  // loop over the process vertices
+  // Loop over the tracks
   for (auto& track : tracks) {
     /// collect the information
-    m_barcode    = track.first;
+
+    // get the truth particle info
+    m_t_barcode = track.first;
+    ACTS_DEBUG("Find the truth particle with barcode = " << m_t_barcode);
+    auto charge             = chargeMap.find(m_t_barcode);
+    m_t_charge              = charge->second;
+    auto           posmom   = posmomMap.find(m_t_barcode);
+    Acts::Vector3D truthPos = (posmom->second).first;
+    Acts::Vector3D truthMom = (posmom->second).second;
+    m_t_vx                  = truthPos.x();
+    m_t_vy                  = truthPos.y();
+    m_t_vz                  = truthPos.z();
+    m_t_ipx                 = truthMom.x();
+    m_t_ipy                 = truthMom.y();
+    m_t_ipz                 = truthMom.z();
+    m_t_itheta              = theta(truthMom);
+    m_t_iphi                = phi(truthMom);
+    m_t_ieta                = eta(truthMom);
+    m_t_ipT                 = perp(truthMom);
+
+    // get the trackState info
     m_nStates    = track.second.size();
     m_nPredicted = 0;
     m_nFiltered  = 0;
@@ -159,6 +223,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       m_volumeID.push_back(geoID.value(Acts::GeometryID::volume_mask));
       m_layerID.push_back(geoID.value(Acts::GeometryID::layer_mask));
       m_moduleID.push_back(geoID.value(Acts::GeometryID::sensitive_mask));
+
       // get the uncalibrated measurement
       auto meas = boost::get<Measurement>(*state.measurement.uncalibrated);
       // get local position
@@ -167,10 +232,14 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       // get global position
       Acts::Vector3D global(0, 0, 0);
       Acts::Vector3D mom(1, 1, 1);
-      // transform local into global position information
       meas.referenceSurface().localToGlobal(local, mom, global);
 
-      // push the measurment
+      // get measurement covariance
+      auto  cov  = meas.covariance();
+      float resX = sqrt(cov(0, 0));
+      float resY = sqrt(cov(1, 1));
+
+      // push the measurement
       m_lx_uncalib.push_back(local.x());
       m_ly_uncalib.push_back(local.y());
       m_x_uncalib.push_back(global.x());
@@ -190,6 +259,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                 - local.x());
         m_resid_y_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
                                 - local.y());
+        m_pull_x_prt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_0] - local.x()) / resX);
+        m_pull_y_prt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_1] - local.y()) / resY);
         m_x_prt.push_back(parameter.position().x());
         m_y_prt.push_back(parameter.position().y());
         m_z_prt.push_back(parameter.position().z());
@@ -200,7 +273,6 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_phi_prt.push_back(phi(parameter.momentum()));
         m_eta_prt.push_back(parameter.eta());
         m_pT_prt.push_back(parameter.pT());
-        m_charge.push_back(parameter.charge());
       }
 
       // get the filtered parameter
@@ -216,6 +288,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                 - local.x());
         m_resid_y_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
                                 - local.y());
+        m_pull_x_flt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_0] - local.x()) / resX);
+        m_pull_y_flt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_1] - local.y()) / resY);
         m_x_flt.push_back(parameter.position().x());
         m_y_flt.push_back(parameter.position().y());
         m_z_flt.push_back(parameter.position().z());
@@ -241,6 +317,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                 - local.x());
         m_resid_y_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]
                                 - local.y());
+        m_pull_x_smt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_0] - local.x()) / resX);
+        m_pull_y_smt.push_back(
+            (parameter.parameters()[Acts::ParDef::eLOC_1] - local.y()) / resY);
         m_x_smt.push_back(parameter.position().x());
         m_y_smt.push_back(parameter.position().y());
         m_z_smt.push_back(parameter.position().z());
@@ -252,11 +332,16 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_eta_smt.push_back(parameter.eta());
         m_pT_smt.push_back(parameter.pT());
       }
+
       m_prt.push_back(predicted);
       m_flt.push_back(filtered);
       m_smt.push_back(smoothed);
-    }
+
+    }  // all states
+
+    // fill the variables for one track to tree
     m_outputTree->Fill();
+
     // now reset
     m_volumeID.clear();
     m_layerID.clear();
@@ -272,6 +357,8 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_ly_prt.clear();
     m_resid_x_prt.clear();
     m_resid_y_prt.clear();
+    m_pull_x_prt.clear();
+    m_pull_y_prt.clear();
     m_x_prt.clear();
     m_y_prt.clear();
     m_z_prt.clear();
@@ -282,13 +369,14 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_phi_prt.clear();
     m_eta_prt.clear();
     m_pT_prt.clear();
-    m_charge.clear();
 
     m_flt.clear();
     m_lx_flt.clear();
     m_ly_flt.clear();
     m_resid_x_flt.clear();
     m_resid_y_flt.clear();
+    m_pull_x_flt.clear();
+    m_pull_y_flt.clear();
     m_x_flt.clear();
     m_y_flt.clear();
     m_z_flt.clear();
@@ -305,6 +393,8 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_ly_smt.clear();
     m_resid_x_smt.clear();
     m_resid_y_smt.clear();
+    m_pull_x_smt.clear();
+    m_pull_y_smt.clear();
     m_x_smt.clear();
     m_y_smt.clear();
     m_z_smt.clear();
@@ -315,7 +405,8 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_phi_smt.clear();
     m_eta_smt.clear();
     m_pT_smt.clear();
-  }
+
+  }  // all tracks
 
   return ProcessCode::SUCCESS;
 }

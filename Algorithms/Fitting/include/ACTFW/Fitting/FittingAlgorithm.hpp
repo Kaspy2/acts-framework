@@ -33,14 +33,6 @@
 
 namespace FW {
 
-// A few initialisations and definitionas
-using Identifier = Acts::GeometryID;
-using TrackState = Acts::TrackState<Identifier, Acts::BoundParameters>;
-using TrackMap   = std::map<barcode_type, std::vector<TrackState>>;
-using VertexMap
-    = std::map<barcode_type, std::pair<Acts::Vector3D, Acts::Vector3D>>;
-using ChargeMap = std::map<barcode_type, double>;
-
 std::normal_distribution<double> gauss(0., 1.);
 std::default_random_engine       generator(42);
 
@@ -48,6 +40,14 @@ template <typename kalman_Fitter_t>
 class FittingAlgorithm : public BareAlgorithm
 {
 public:
+  // A few initialisations and definitionas
+  using Identifier = Acts::GeometryID;
+  using TrackState = Acts::TrackState<Identifier, Acts::BoundParameters>;
+  using TrackMap   = std::map<barcode_type, std::vector<TrackState>>;
+  using VertexMap
+      = std::map<barcode_type, std::pair<Acts::Vector3D, Acts::Vector3D>>;
+  using ChargeMap = std::map<barcode_type, double>;
+
   /// Nested configuration struct
   struct Config
   {
