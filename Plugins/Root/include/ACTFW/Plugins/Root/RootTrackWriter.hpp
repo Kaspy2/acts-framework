@@ -53,6 +53,7 @@ namespace Root {
     {
       std::string trackCollection;           ///< track collection to write
       std::string simulatedEventCollection;  ///< truth particle collection
+      std::string simulatedHitCollection;    ///< truth hit collection
       std::string filePath;                  ///< path of the output file
       std::string fileMode = "RECREATE";     ///< file access mode
       std::string treeName = "tracks";       ///< name of the output tree
@@ -88,17 +89,29 @@ namespace Root {
     int        m_eventNr{0};           ///< the event number
 
     unsigned long m_t_barcode{0};  ///< Truth particle barcode
-    float         m_t_charge;      ///< Truth particle charge
-    float         m_t_vx;          ///< Truth particle vertex x
-    float         m_t_vy;          ///< Truth particle vertex y
-    float         m_t_vz;          ///< Truth particle vertex z
-    float         m_t_ipx;         ///< Truth particle initial momentum px
-    float         m_t_ipy;         ///< Truth particle initial momentum py
-    float         m_t_ipz;         ///< Truth particle initial momentum pz
-    float         m_t_itheta;      ///< Truth particle initial momentum theta
-    float         m_t_iphi;        ///< Truth particle initial momentum phi
-    float         m_t_ieta;        ///< Truth particle initial momentum eta
-    float         m_t_ipT;         ///< Truth particle initial momentum pT
+    int           m_t_charge{0};   ///< Truth particle charge
+    float         m_t_vx{0.};      ///< Truth particle vertex x
+    float         m_t_vy{0.};      ///< Truth particle vertex y
+    float         m_t_vz{0.};      ///< Truth particle vertex z
+    float         m_t_px{0.};      ///< Truth particle initial momentum px
+    float         m_t_py{0.};      ///< Truth particle initial momentum py
+    float         m_t_pz{0.};      ///< Truth particle initial momentum pz
+    float         m_t_theta{0.};   ///< Truth particle initial momentum theta
+    float         m_t_phi{0.};     ///< Truth particle initial momentum phi
+    float         m_t_eta{0.};     ///< Truth particle initial momentum eta
+    float         m_t_pT{0.};      ///< Truth particle initial momentum pT
+
+    std::vector<float> m_t_x;  ///< Global truth hit position x
+    std::vector<float> m_t_y;  ///< Global truth hit position y
+    std::vector<float> m_t_z;  ///< Global truth hit position z
+    std::vector<float>
+        m_t_dx;  ///< Truth particle direction x at global hit position
+    std::vector<float>
+        m_t_dy;  ///< Truth particle direction y at global hit position
+    std::vector<float>
+                       m_t_dz;  ///< Truth particle direction z at global hit position
+    std::vector<float> m_t_lx;  ///< Local truth hit position x
+    std::vector<float> m_t_ly;  ///< Local truth hit position y
 
     int                m_nStates{0};  ///< number of states
     std::vector<int>   m_volumeID;    ///< volume identifier
@@ -106,9 +119,13 @@ namespace Root {
     std::vector<int>   m_moduleID;    ///< surface identifier
     std::vector<float> m_lx_uncalib;  ///< uncalibrated measurement local x
     std::vector<float> m_ly_uncalib;  ///< uncalibrated measurement local y
-    std::vector<float> m_x_uncalib;   ///< uncalibrated measurement global x
-    std::vector<float> m_y_uncalib;   ///< uncalibrated measurement global y
-    std::vector<float> m_z_uncalib;   ///< uncalibrated measurement global y
+    std::vector<float>
+        m_reso_x_uncalib;  ///< uncalibrated measurement resolution x
+    std::vector<float>
+                       m_reso_y_uncalib;  ///< uncalibrated measurement resolution y
+    std::vector<float> m_x_uncalib;       ///< uncalibrated measurement global x
+    std::vector<float> m_y_uncalib;       ///< uncalibrated measurement global y
+    std::vector<float> m_z_uncalib;       ///< uncalibrated measurement global y
 
     int m_nPredicted{0};          ///< number of states with predicted parameter
     std::vector<bool>  m_prt;     ///< predicted status

@@ -97,6 +97,8 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
     tWriterRootConfig.trackCollection = fittingConfig.trackCollection;
     tWriterRootConfig.simulatedEventCollection
         = fittingConfig.simulatedEventCollection;
+    tWriterRootConfig.simulatedHitCollection
+        = fittingConfig.simulatedHitCollection;
     tWriterRootConfig.filePath
         = FW::joinPaths(outputDir, fittingConfig.trackCollection + ".root");
     tWriterRootConfig.treeName = fittingConfig.trackCollection;

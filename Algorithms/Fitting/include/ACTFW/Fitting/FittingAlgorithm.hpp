@@ -41,12 +41,10 @@ class FittingAlgorithm : public BareAlgorithm
 {
 public:
   // A few initialisations and definitionas
-  using Identifier = Acts::GeometryID;
-  using TrackState = Acts::TrackState<Identifier, Acts::BoundParameters>;
-  using TrackMap   = std::map<barcode_type, std::vector<TrackState>>;
-  using VertexMap
-      = std::map<barcode_type, std::pair<Acts::Vector3D, Acts::Vector3D>>;
-  using ChargeMap = std::map<barcode_type, double>;
+  using Identifier  = Acts::GeometryID;
+  using TrackState  = Acts::TrackState<Identifier, Acts::BoundParameters>;
+  using TrackMap    = std::map<barcode_type, std::vector<TrackState>>;
+  using ParticleMap = std::map<barcode_type, Data::SimParticle>;
 
   /// Nested configuration struct
   struct Config
@@ -58,7 +56,7 @@ public:
     /// input event collection
     std::string simulatedEventCollection = "";
     /// output track collection
-    std::string trackCollection = "trackCollection";
+    std::string trackCollection = "";
     /// kalmanFitter instance
     kalman_Fitter_t kFitter;
   };
@@ -180,16 +178,12 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
 
   ACTS_DEBUG("There are " << tracks.size() << " tracks for this event ");
 
-  // Get the position and momentum of the truth particle
-  ACTS_DEBUG("Get position and momentum of the truth particle ");
-  VertexMap posmomMap;
-  ChargeMap chargeMap;
+  // Get the truth particle
+  ACTS_DEBUG("Get truth particle.");
+  ParticleMap particles;
   for (auto& vertex : *simulatedEvent) {
     for (auto& particle : vertex.outgoing()) {
-      std::pair<Acts::Vector3D, Acts::Vector3D> posmom(particle.position(),
-                                                       particle.momentum());
-      posmomMap.insert(std::make_pair(particle.barcode(), posmom));
-      chargeMap.insert(std::make_pair(particle.barcode(), particle.q()));
+      particles.insert(std::make_pair(particle.barcode(), particle));
     }
   }
 
@@ -198,17 +192,19 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
   for (TrackMap::iterator it = tracks.begin(); it != tracks.end(); ++it) {
     if (it->first == 0) continue;
     itrack++;
-    barcode_type barcode = it->first;
-    ACTS_DEBUG("Start processing itrack = " << itrack << " with particle id = "
-                                            << barcode);
+    barcode_type barcode  = it->first;
+    auto         particle = particles.find(barcode)->second;
+
     auto measurements = it->second;
-    auto posmom       = posmomMap.find(barcode);
-    auto charge       = chargeMap.find(barcode);
+    ACTS_DEBUG("Start processing itrack = " << itrack << " with nStates = "
+                                            << measurements.size()
+                                            << " and truth particle id = "
+                                            << barcode);
 
     // get the truth particle info
-    Acts::Vector3D pos = (posmom->second).first;
-    Acts::Vector3D mom = (posmom->second).second;
-    double         q   = charge->second;
+    Acts::Vector3D pos = particle.position();
+    Acts::Vector3D mom = particle.momentum();
+    double         q   = particle.q();
     ACTS_DEBUG("truth position = " << pos[0] << " : " << pos[1] << " : "
                                    << pos[2]);
     ACTS_DEBUG("truth momentum = " << mom[0] << " : " << mom[1] << " : "
@@ -238,9 +234,6 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
     Acts::Vector3D rPos(pos[0] + 10. * Acts::units::_um * gauss(generator),
                         pos[1] + 10. * Acts::units::_um * gauss(generator),
                         pos[2] + 10. * Acts::units::_um * gauss(generator));
-    // Acts::Vector3D rPos(pos[0],
-    //                    pos[1],
-    //                    pos[2]);
 
     // prepare the initial momentum
     double         rPhi   = fphi + phiRes * gauss(generator);
