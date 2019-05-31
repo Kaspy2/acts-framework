@@ -216,32 +216,40 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
     double fphi   = Acts::VectorHelpers::phi(mom);
     double ftheta = Acts::VectorHelpers::theta(mom);
     double fp     = mom.norm();
-    double qOp    = q / fp;
+    double fqOp   = q / fp;
 
+    // set the smearing error
+    double loc0Res  = 10 * Acts::units::_um;
+    double loc1Res  = 10 * Acts::units::_um;
     double phiRes   = 0.02;
     double thetaRes = 0.02;
-    double pRes     = 0.025 * Acts::units::_GeV;
-    double qOpRes   = -q * pRes / fp * fp;
+    double qOpRes   = -q / (fp * fp) * 1.0 * Acts::units::_GeV;
 
     // prepare the covariance
     Acts::ActsSymMatrixD<5> cov;
-    cov << pow(10 * Acts::units::_um, 2), 0., 0., 0., 0., 0.,
-        pow(10 * Acts::units::_um, 2), 0., 0., 0., 0., 0., pow(phiRes, 2), 0.,
-        0., 0., 0., 0., pow(thetaRes, 2), 0., 0., 0., 0., 0., pow(qOpRes, 2);
+    cov << pow(loc0Res, 2), 0., 0., 0., 0., 0., pow(loc1Res, 2), 0., 0., 0., 0.,
+        0., pow(phiRes, 2), 0., 0., 0., 0., 0., pow(thetaRes, 2), 0., 0., 0.,
+        0., 0., pow(qOpRes, 2);
     auto covPtr = std::make_unique<const Acts::ActsSymMatrixD<5>>(cov);
-
-    // prepare the initial position
-    Acts::Vector3D rPos(pos[0] + 10. * Acts::units::_um * gauss(generator),
-                        pos[1] + 10. * Acts::units::_um * gauss(generator),
-                        pos[2] + 10. * Acts::units::_um * gauss(generator));
 
     // prepare the initial momentum
     double         rPhi   = fphi + phiRes * gauss(generator);
     double         rTheta = ftheta + thetaRes * gauss(generator);
-    double         rP     = fp + pRes * gauss(generator);
+    double         rP     = q / (fqOp + qOpRes * gauss(generator));
     Acts::Vector3D rMom(rP * sin(rTheta) * cos(rPhi),
                         rP * sin(rTheta) * sin(rPhi),
                         rP * cos(rTheta));
+
+    // prepare the initial position
+    // the rotation of the starting surface
+    Acts::Vector3D T = mom.normalized();
+    Acts::Vector3D U = std::abs(T.dot(Acts::Vector3D::UnitZ())) < 0.99
+        ? Acts::Vector3D::UnitZ().cross(T).normalized()
+        : Acts::Vector3D::UnitX().cross(T).normalized();
+    Acts::Vector3D V = T.cross(U);
+    Acts::Vector3D displaced
+        = U * loc0Res * gauss(generator) + V * loc1Res * gauss(generator);
+    Acts::Vector3D rPos = pos + displaced;
 
     // then create the start parameters using the prepared momentum and position
     Acts::SingleCurvilinearTrackParameters<Acts::ChargedPolicy> rStart(
