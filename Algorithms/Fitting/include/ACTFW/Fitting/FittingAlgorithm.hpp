@@ -21,6 +21,7 @@
 #include "ACTFW/EventData/SimVertex.hpp"
 #include "ACTFW/Framework/ProcessCode.hpp"
 #include "ACTFW/Framework/WhiteBoard.hpp"
+#include "ACTFW/Random/RandomNumberDistributions.hpp"
 #include "ACTFW/Random/RandomNumbersSvc.hpp"
 #include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -32,9 +33,6 @@
 #include "Acts/Utilities/ParameterDefinitions.hpp"
 
 namespace FW {
-
-std::normal_distribution<double> gauss(0., 1.);
-std::default_random_engine       generator(42);
 
 template <typename kalman_Fitter_t>
 class FittingAlgorithm : public BareAlgorithm
@@ -59,6 +57,8 @@ public:
     std::string trackCollection = "";
     /// kalmanFitter instance
     kalman_Fitter_t kFitter;
+    /// FW random number service
+    std::shared_ptr<RandomNumbersSvc> randomNumberSvc = nullptr;
   };
 
   /// Constructor of the fitting algorithm
@@ -101,6 +101,10 @@ FW::ProcessCode
 FW::FittingAlgorithm<kalman_Fitter_t>::execute(
     FW::AlgorithmContext context) const
 {
+  // Create a random number generator
+  FW::RandomEngine generator = m_cfg.randomNumberSvc->spawnGenerator(context);
+  FW::GaussDist    gauss(0, 1);
+
   // Read truth particles from input collection
   const std::vector<FW::Data::SimVertex<>>* simulatedEvent = nullptr;
   if (context.eventStore.get(m_cfg.simulatedEventCollection, simulatedEvent)

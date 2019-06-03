@@ -37,13 +37,16 @@
 /// @param vm The boost variable map to resolve
 /// @param tGeometry The TrackingGeometry for the tracking setup
 /// @param barcodesSvc The barcode service to be used for the fitting
+/// @param randomNumberSvc The random number service to be used for the
+/// fitting
 template <typename bfield_t>
 void
 setupFittingAlgorithm(bfield_t                                      fieldMap,
                       FW::Sequencer&                                sequencer,
                       po::variables_map&                            vm,
                       std::shared_ptr<const Acts::TrackingGeometry> tGeometry,
-                      std::shared_ptr<FW::BarcodeSvc>               barcodeSvc)
+                      std::shared_ptr<FW::BarcodeSvc>               barcodeSvc,
+                      std::shared_ptr<FW::RandomNumbersSvc> randomNumberSvc)
 {
 
   // Read the log level
@@ -73,12 +76,7 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
   typename FittingAlgorithm::Config fittingConfig
       = FW::Options::readFittingConfig<po::variables_map, KalmanFitter>(
           vm, kFitter);
-  fittingConfig.simulatedHitCollection
-      = vm["fatras-sim-hits"].template as<std::string>();
-  fittingConfig.simulatedEventCollection
-      = vm["fatras-sim-particles"].template as<std::string>();
-  fittingConfig.trackCollection
-      = vm["fitted-tracks"].template as<std::string>();
+  fittingConfig.randomNumberSvc = randomNumberSvc;
 
   // Finally the fitting algorithm
   auto fittingAlgorithm
@@ -118,12 +116,15 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
 /// @param vm The boost variable map to resolve
 /// @param tGeometry The TrackingGeometry for the tracking setup
 /// @param barcodesSvc The barcode service to be used for the fitting
+/// @param randomNumberSvc The random number service to be used for the
+/// fitting
 template <typename vmap_t>
 void
 setupFitting(vmap_t&                                       vm,
              FW::Sequencer&                                sequencer,
              std::shared_ptr<const Acts::TrackingGeometry> tGeometry,
-             std::shared_ptr<FW::BarcodeSvc>               barcodeSvc)
+             std::shared_ptr<FW::BarcodeSvc>               barcodeSvc,
+             std::shared_ptr<FW::RandomNumbersSvc>         randomNumberSvc)
 {
   // create BField service
   auto bField = FW::Options::readBField<vmap_t>(vm);
@@ -133,14 +134,22 @@ setupFitting(vmap_t&                                       vm,
     using BField = Acts::SharedBField<Acts::InterpolatedBFieldMap>;
     BField fieldMap(bField.first);
     // now setup of the fitting algorithm and append it to the sequencer
-    setupFittingAlgorithm(
-        std::move(fieldMap), sequencer, vm, tGeometry, barcodeSvc);
+    setupFittingAlgorithm(std::move(fieldMap),
+                          sequencer,
+                          vm,
+                          tGeometry,
+                          barcodeSvc,
+                          randomNumberSvc);
   } else {
     // create the shared field
     using CField = Acts::ConstantBField;
     CField fieldMap(*bField.second);
     // now setup of the fitting algorithm and append it to the sequencer
-    setupFittingAlgorithm(
-        std::move(fieldMap), sequencer, vm, tGeometry, barcodeSvc);
+    setupFittingAlgorithm(std::move(fieldMap),
+                          sequencer,
+                          vm,
+                          tGeometry,
+                          barcodeSvc,
+                          randomNumberSvc);
   }
 }
