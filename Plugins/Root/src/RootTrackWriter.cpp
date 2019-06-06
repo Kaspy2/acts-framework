@@ -287,12 +287,12 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       m_t_vx                  = truthPos.x();
       m_t_vy                  = truthPos.y();
       m_t_vz                  = truthPos.z();
+      m_t_eta                 = eta(truthPos);
       m_t_px                  = truthMom.x();
       m_t_py                  = truthMom.y();
       m_t_pz                  = truthMom.z();
       m_t_theta               = theta(truthMom);
       m_t_phi                 = phi(truthMom);
-      m_t_eta                 = eta(truthMom);
       m_t_pT                  = perp(truthMom);
     } else {
       ACTS_WARNING("Truth particle with barcode = " << m_t_barcode
@@ -324,8 +324,8 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
 
       // get measurement covariance
       auto  cov  = meas.covariance();
-      float resX = sqrt(cov(0, 0));
-      float resY = sqrt(cov(1, 1));
+      float resX = sqrt(cov(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0));
+      float resY = sqrt(cov(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1));
 
       // push the measurement info
       m_lx_uncalib.push_back(local.x());
@@ -429,33 +429,38 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                    - truthTHETA);
         m_res_eQOP_prt.push_back(parameter.parameters()[Acts::ParDef::eQOP]
                                  - truthQOP);
-        m_err_eLOC0_prt.push_back(sqrt(covariance(0, 0)));
-        m_err_eLOC1_prt.push_back(sqrt(covariance(1, 1)));
-        m_err_ePHI_prt.push_back(sqrt(covariance(2, 2)));
-        m_err_eTHETA_prt.push_back(sqrt(covariance(3, 3)));
-        m_err_eQOP_prt.push_back(sqrt(covariance(4, 4)));
+        m_err_eLOC0_prt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
+        m_err_eLOC1_prt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
+        m_err_ePHI_prt.push_back(
+            sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
+        m_err_eTHETA_prt.push_back(
+            sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
+        m_err_eQOP_prt.push_back(
+            sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_pull_eLOC0_prt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_0] - truthLOC0)
-            / sqrt(covariance(0, 0)));
+            / sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
         m_pull_eLOC1_prt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_1] - truthLOC1)
-            / sqrt(covariance(1, 1)));
+            / sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
         m_pull_ePHI_prt.push_back(
             (parameter.parameters()[Acts::ParDef::ePHI] - truthPHI)
-            / sqrt(covariance(2, 2)));
+            / sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
         m_pull_eTHETA_prt.push_back(
             (parameter.parameters()[Acts::ParDef::eTHETA] - truthTHETA)
-            / sqrt(covariance(3, 3)));
+            / sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
         m_pull_eQOP_prt.push_back(
             (parameter.parameters()[Acts::ParDef::eQOP] - truthQOP)
-            / sqrt(covariance(4, 4)));
+            / sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_x_prt.push_back(parameter.position().x());
         m_y_prt.push_back(parameter.position().y());
         m_z_prt.push_back(parameter.position().z());
+        m_eta_prt.push_back(eta(parameter.position()));
         m_px_prt.push_back(parameter.momentum().x());
         m_py_prt.push_back(parameter.momentum().y());
         m_pz_prt.push_back(parameter.momentum().z());
-        m_eta_prt.push_back(parameter.eta());
         m_pT_prt.push_back(parameter.pT());
       } else {
         // push default values if no predicted parameter
@@ -482,10 +487,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_prt.push_back(-99.);
         m_y_prt.push_back(-99.);
         m_z_prt.push_back(-99.);
+        m_eta_prt.push_back(-99.);
         m_px_prt.push_back(-99.);
         m_py_prt.push_back(-99.);
         m_pz_prt.push_back(-99.);
-        m_eta_prt.push_back(-99.);
         m_pT_prt.push_back(-99.);
       }
 
@@ -512,33 +517,38 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                    - truthTHETA);
         m_res_eQOP_flt.push_back(parameter.parameters()[Acts::ParDef::eQOP]
                                  - truthQOP);
-        m_err_eLOC0_flt.push_back(sqrt(covariance(0, 0)));
-        m_err_eLOC1_flt.push_back(sqrt(covariance(1, 1)));
-        m_err_ePHI_flt.push_back(sqrt(covariance(2, 2)));
-        m_err_eTHETA_flt.push_back(sqrt(covariance(3, 3)));
-        m_err_eQOP_flt.push_back(sqrt(covariance(4, 4)));
+        m_err_eLOC0_flt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
+        m_err_eLOC1_flt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
+        m_err_ePHI_flt.push_back(
+            sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
+        m_err_eTHETA_flt.push_back(
+            sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
+        m_err_eQOP_flt.push_back(
+            sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_pull_eLOC0_flt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_0] - truthLOC0)
-            / sqrt(covariance(0, 0)));
+            / sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
         m_pull_eLOC1_flt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_1] - truthLOC1)
-            / sqrt(covariance(1, 1)));
+            / sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
         m_pull_ePHI_flt.push_back(
             (parameter.parameters()[Acts::ParDef::ePHI] - truthPHI)
-            / sqrt(covariance(2, 2)));
+            / sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
         m_pull_eTHETA_flt.push_back(
             (parameter.parameters()[Acts::ParDef::eTHETA] - truthTHETA)
-            / sqrt(covariance(3, 3)));
+            / sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
         m_pull_eQOP_flt.push_back(
             (parameter.parameters()[Acts::ParDef::eQOP] - truthQOP)
-            / sqrt(covariance(4, 4)));
+            / sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_x_flt.push_back(parameter.position().x());
         m_y_flt.push_back(parameter.position().y());
         m_z_flt.push_back(parameter.position().z());
+        m_eta_flt.push_back(eta(parameter.position()));
         m_px_flt.push_back(parameter.momentum().x());
         m_py_flt.push_back(parameter.momentum().y());
         m_pz_flt.push_back(parameter.momentum().z());
-        m_eta_flt.push_back(parameter.eta());
         m_pT_flt.push_back(parameter.pT());
       } else {
         // push default values if no filtered parameter
@@ -565,10 +575,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_flt.push_back(-99.);
         m_y_flt.push_back(-99.);
         m_z_flt.push_back(-99.);
+        m_eta_flt.push_back(-99.);
         m_px_flt.push_back(-99.);
         m_py_flt.push_back(-99.);
         m_pz_flt.push_back(-99.);
-        m_eta_flt.push_back(-99.);
         m_pT_flt.push_back(-99.);
       }
 
@@ -578,7 +588,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         smoothed = true;
         m_nSmoothed++;
         auto parameter  = *state.parameter.smoothed;
-        auto covariance = *parameter.covariance();
+        auto covariance = *state.parameter.smoothed->covariance();
         // push the smoothed parameter
         m_eLOC0_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_eLOC1_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
@@ -595,33 +605,38 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
                                    - truthTHETA);
         m_res_eQOP_smt.push_back(parameter.parameters()[Acts::ParDef::eQOP]
                                  - truthQOP);
-        m_err_eLOC0_smt.push_back(sqrt(covariance(0, 0)));
-        m_err_eLOC1_smt.push_back(sqrt(covariance(1, 1)));
-        m_err_ePHI_smt.push_back(sqrt(covariance(2, 2)));
-        m_err_eTHETA_smt.push_back(sqrt(covariance(3, 3)));
-        m_err_eQOP_smt.push_back(sqrt(covariance(4, 4)));
+        m_err_eLOC0_smt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
+        m_err_eLOC1_smt.push_back(
+            sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
+        m_err_ePHI_smt.push_back(
+            sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
+        m_err_eTHETA_smt.push_back(
+            sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
+        m_err_eQOP_smt.push_back(
+            sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_pull_eLOC0_smt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_0] - truthLOC0)
-            / sqrt(covariance(0, 0)));
+            / sqrt(covariance(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
         m_pull_eLOC1_smt.push_back(
             (parameter.parameters()[Acts::ParDef::eLOC_1] - truthLOC1)
-            / sqrt(covariance(1, 1)));
+            / sqrt(covariance(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
         m_pull_ePHI_smt.push_back(
             (parameter.parameters()[Acts::ParDef::ePHI] - truthPHI)
-            / sqrt(covariance(2, 2)));
+            / sqrt(covariance(Acts::ParDef::ePHI, Acts::ParDef::ePHI)));
         m_pull_eTHETA_smt.push_back(
             (parameter.parameters()[Acts::ParDef::eTHETA] - truthTHETA)
-            / sqrt(covariance(3, 3)));
+            / sqrt(covariance(Acts::ParDef::eTHETA, Acts::ParDef::eTHETA)));
         m_pull_eQOP_smt.push_back(
             (parameter.parameters()[Acts::ParDef::eQOP] - truthQOP)
-            / sqrt(covariance(4, 4)));
+            / sqrt(covariance(Acts::ParDef::eQOP, Acts::ParDef::eQOP)));
         m_x_smt.push_back(parameter.position().x());
         m_y_smt.push_back(parameter.position().y());
         m_z_smt.push_back(parameter.position().z());
+        m_eta_smt.push_back(eta(parameter.position()));
         m_px_smt.push_back(parameter.momentum().x());
         m_py_smt.push_back(parameter.momentum().y());
         m_pz_smt.push_back(parameter.momentum().z());
-        m_eta_smt.push_back(parameter.eta());
         m_pT_smt.push_back(parameter.pT());
       } else {
         // push default values if no smoothed parameter
@@ -648,10 +663,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_smt.push_back(-99.);
         m_y_smt.push_back(-99.);
         m_z_smt.push_back(-99.);
+        m_eta_smt.push_back(-99.);
         m_px_smt.push_back(-99.);
         m_py_smt.push_back(-99.);
         m_pz_smt.push_back(-99.);
-        m_eta_smt.push_back(-99.);
         m_pT_smt.push_back(-99.);
       }
 

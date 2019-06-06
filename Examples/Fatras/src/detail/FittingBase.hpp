@@ -13,6 +13,7 @@
 #include "ACTFW/Fitting/FittingOptions.hpp"
 #include "ACTFW/Framework/Sequencer.hpp"
 #include "ACTFW/Plugins/BField/BFieldOptions.hpp"
+#include "ACTFW/Plugins/Root/RootPerformanceValidation.hpp"
 #include "ACTFW/Plugins/Root/RootTrackWriter.hpp"
 #include "ACTFW/Utilities/Paths.hpp"
 #include "Acts/Detector/TrackingGeometry.hpp"
@@ -89,7 +90,7 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
   std::string outputDir = vm["output-dir"].template as<std::string>();
 
   // Write fitted tracks as ROOT files
-  std::shared_ptr<FW::Root::RootTrackWriter> tWriterRoot = nullptr;
+  std::shared_ptr<FW::Root::RootTrackWriter> tWriterRoot;
   if (vm["output-root"].template as<bool>()) {
     FW::Root::RootTrackWriter::Config tWriterRootConfig;
     tWriterRootConfig.trackCollection = fittingConfig.trackCollection;
@@ -100,10 +101,29 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
     tWriterRootConfig.filePath
         = FW::joinPaths(outputDir, fittingConfig.trackCollection + ".root");
     tWriterRootConfig.treeName = fittingConfig.trackCollection;
-    auto tWriterRoot
+    tWriterRoot
         = std::make_shared<FW::Root::RootTrackWriter>(tWriterRootConfig);
 
     sequencer.addWriters({tWriterRoot});
+  }
+
+  // Write performance plots as ROOT files
+  std::shared_ptr<FW::Root::RootPerformanceValidation> perfValidation;
+  if (vm["output-root"].template as<bool>()) {
+    FW::ResPlotTool::Config                     resPlotToolConfig;
+    FW::Root::RootPerformanceValidation::Config perfValidationConfig;
+    perfValidationConfig.resPlotToolConfig = resPlotToolConfig;
+    perfValidationConfig.trackCollection   = fittingConfig.trackCollection;
+    perfValidationConfig.simulatedEventCollection
+        = fittingConfig.simulatedEventCollection;
+    perfValidationConfig.simulatedHitCollection
+        = fittingConfig.simulatedHitCollection;
+    perfValidationConfig.filePath = FW::joinPaths(
+        outputDir, fittingConfig.trackCollection + "_performance.root");
+    perfValidation = std::make_shared<FW::Root::RootPerformanceValidation>(
+        perfValidationConfig);
+
+    sequencer.addWriters({perfValidation});
   }
 }
 
