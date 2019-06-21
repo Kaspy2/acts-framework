@@ -149,8 +149,8 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
           hitSurface->globalToLocal(hit.position, mom, local);
 
           // smear the truth hit with a gaussian and set the covariance
-          double                  resX = 10. * Acts::units::_um;
-          double                  resY = 10. * Acts::units::_um;
+          double                  resX = 30. * Acts::units::_um;
+          double                  resY = 30. * Acts::units::_um;
           Acts::ActsSymMatrixD<2> cov2D;
           cov2D << resX * resX, 0., 0., resY * resY;
 
@@ -246,7 +246,7 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
 
     // prepare the initial position
     // the rotation of the starting surface
-    Acts::Vector3D T = mom.normalized();
+    Acts::Vector3D T = rMom.normalized();
     Acts::Vector3D U = std::abs(T.dot(Acts::Vector3D::UnitZ())) < 0.99
         ? Acts::Vector3D::UnitZ().cross(T).normalized()
         : Acts::Vector3D::UnitX().cross(T).normalized();

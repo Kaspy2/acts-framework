@@ -80,13 +80,17 @@ FW::Root::RootTrackWriter::RootTrackWriter(
     m_outputTree->Branch("volume_id", &m_volumeID);
     m_outputTree->Branch("layer_id", &m_layerID);
     m_outputTree->Branch("module_id", &m_moduleID);
-    m_outputTree->Branch("l_x_uncalib", &m_lx_uncalib);
-    m_outputTree->Branch("l_y_uncalib", &m_ly_uncalib);
-    m_outputTree->Branch("l_err_x_uncalib", &m_err_x_uncalib);
-    m_outputTree->Branch("l_err_y_uncalib", &m_err_y_uncalib);
-    m_outputTree->Branch("g_x_uncalib", &m_x_uncalib);
-    m_outputTree->Branch("g_y_uncalib", &m_y_uncalib);
-    m_outputTree->Branch("g_z_uncalib", &m_z_uncalib);
+    m_outputTree->Branch("l_x_hit", &m_lx_hit);
+    m_outputTree->Branch("l_y_hit", &m_ly_hit);
+    m_outputTree->Branch("g_x_hit", &m_x_hit);
+    m_outputTree->Branch("g_y_hit", &m_y_hit);
+    m_outputTree->Branch("g_z_hit", &m_z_hit);
+    m_outputTree->Branch("res_x_hit", &m_res_x_hit);
+    m_outputTree->Branch("res_y_hit", &m_res_y_hit);
+    m_outputTree->Branch("err_x_hit", &m_err_x_hit);
+    m_outputTree->Branch("err_y_hit", &m_err_y_hit);
+    m_outputTree->Branch("pull_x_hit", &m_pull_x_hit);
+    m_outputTree->Branch("pull_y_hit", &m_pull_y_hit);
 
     m_outputTree->Branch("nPredicted", &m_nPredicted);
     m_outputTree->Branch("predicted", &m_prt);
@@ -287,13 +291,13 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       m_t_vx                  = truthPos.x();
       m_t_vy                  = truthPos.y();
       m_t_vz                  = truthPos.z();
-      m_t_eta                 = eta(truthPos);
       m_t_px                  = truthMom.x();
       m_t_py                  = truthMom.y();
       m_t_pz                  = truthMom.z();
       m_t_theta               = theta(truthMom);
       m_t_phi                 = phi(truthMom);
       m_t_pT                  = perp(truthMom);
+      m_t_eta                 = eta(truthMom);
     } else {
       ACTS_WARNING("Truth particle with barcode = " << m_t_barcode
                                                     << " not found!");
@@ -328,13 +332,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       float resY = sqrt(cov(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1));
 
       // push the measurement info
-      m_lx_uncalib.push_back(local.x());
-      m_ly_uncalib.push_back(local.y());
-      m_err_x_uncalib.push_back(resX);
-      m_err_y_uncalib.push_back(resY);
-      m_x_uncalib.push_back(global.x());
-      m_y_uncalib.push_back(global.y());
-      m_z_uncalib.push_back(global.z());
+      m_lx_hit.push_back(local.x());
+      m_ly_hit.push_back(local.y());
+      m_x_hit.push_back(global.x());
+      m_y_hit.push_back(global.y());
+      m_z_hit.push_back(global.z());
 
       // get all truth hits on this module
       auto hitsOnThisModule = hitsOnModule.find(geoID)->second;
@@ -413,7 +415,24 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_nPredicted++;
         auto parameter  = *state.parameter.predicted;
         auto covariance = *parameter.covariance();
-        // push the predicted parameter
+        // local hit residual info
+        auto H        = meas.projector();
+        auto resCov   = cov + H * covariance * H.transpose();
+        auto residual = meas.residual(parameter);
+        m_res_x_hit.push_back(residual(Acts::ParDef::eLOC_0));
+        m_res_y_hit.push_back(residual(Acts::ParDef::eLOC_1));
+        m_err_x_hit.push_back(
+            sqrt(resCov(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
+        m_err_y_hit.push_back(
+            sqrt(resCov(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
+        m_pull_x_hit.push_back(
+            residual(Acts::ParDef::eLOC_0)
+            / sqrt(resCov(Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_0)));
+        m_pull_y_hit.push_back(
+            residual(Acts::ParDef::eLOC_1)
+            / sqrt(resCov(Acts::ParDef::eLOC_1, Acts::ParDef::eLOC_1)));
+
+        // predicted parameter info
         m_eLOC0_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_eLOC1_prt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_ePHI_prt.push_back(parameter.parameters()[Acts::ParDef::ePHI]);
@@ -457,11 +476,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_prt.push_back(parameter.position().x());
         m_y_prt.push_back(parameter.position().y());
         m_z_prt.push_back(parameter.position().z());
-        m_eta_prt.push_back(eta(parameter.position()));
         m_px_prt.push_back(parameter.momentum().x());
         m_py_prt.push_back(parameter.momentum().y());
         m_pz_prt.push_back(parameter.momentum().z());
         m_pT_prt.push_back(parameter.pT());
+        m_eta_prt.push_back(eta(parameter.position()));
       } else {
         // push default values if no predicted parameter
         m_eLOC0_prt.push_back(-99.);
@@ -487,11 +506,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_prt.push_back(-99.);
         m_y_prt.push_back(-99.);
         m_z_prt.push_back(-99.);
-        m_eta_prt.push_back(-99.);
         m_px_prt.push_back(-99.);
         m_py_prt.push_back(-99.);
         m_pz_prt.push_back(-99.);
         m_pT_prt.push_back(-99.);
+        m_eta_prt.push_back(-99.);
       }
 
       // get the filtered parameter
@@ -501,7 +520,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_nFiltered++;
         auto parameter  = *state.parameter.filtered;
         auto covariance = *parameter.covariance();
-        // push the filtered parameter
+        // filtered parameter info
         m_eLOC0_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_eLOC1_flt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_ePHI_flt.push_back(parameter.parameters()[Acts::ParDef::ePHI]);
@@ -545,11 +564,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_flt.push_back(parameter.position().x());
         m_y_flt.push_back(parameter.position().y());
         m_z_flt.push_back(parameter.position().z());
-        m_eta_flt.push_back(eta(parameter.position()));
         m_px_flt.push_back(parameter.momentum().x());
         m_py_flt.push_back(parameter.momentum().y());
         m_pz_flt.push_back(parameter.momentum().z());
         m_pT_flt.push_back(parameter.pT());
+        m_eta_flt.push_back(eta(parameter.position()));
       } else {
         // push default values if no filtered parameter
         m_eLOC0_flt.push_back(-99.);
@@ -575,11 +594,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_flt.push_back(-99.);
         m_y_flt.push_back(-99.);
         m_z_flt.push_back(-99.);
-        m_eta_flt.push_back(-99.);
-        m_px_flt.push_back(-99.);
         m_py_flt.push_back(-99.);
         m_pz_flt.push_back(-99.);
         m_pT_flt.push_back(-99.);
+        m_eta_flt.push_back(-99.);
       }
 
       // get the smoothed parameter
@@ -589,7 +607,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_nSmoothed++;
         auto parameter  = *state.parameter.smoothed;
         auto covariance = *state.parameter.smoothed->covariance();
-        // push the smoothed parameter
+        // smoothed parameter info
         m_eLOC0_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_0]);
         m_eLOC1_smt.push_back(parameter.parameters()[Acts::ParDef::eLOC_1]);
         m_ePHI_smt.push_back(parameter.parameters()[Acts::ParDef::ePHI]);
@@ -633,11 +651,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_smt.push_back(parameter.position().x());
         m_y_smt.push_back(parameter.position().y());
         m_z_smt.push_back(parameter.position().z());
-        m_eta_smt.push_back(eta(parameter.position()));
         m_px_smt.push_back(parameter.momentum().x());
         m_py_smt.push_back(parameter.momentum().y());
         m_pz_smt.push_back(parameter.momentum().z());
         m_pT_smt.push_back(parameter.pT());
+        m_eta_smt.push_back(eta(parameter.position()));
       } else {
         // push default values if no smoothed parameter
         m_eLOC0_smt.push_back(-99.);
@@ -663,11 +681,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_x_smt.push_back(-99.);
         m_y_smt.push_back(-99.);
         m_z_smt.push_back(-99.);
-        m_eta_smt.push_back(-99.);
         m_px_smt.push_back(-99.);
         m_py_smt.push_back(-99.);
         m_pz_smt.push_back(-99.);
         m_pT_smt.push_back(-99.);
+        m_eta_smt.push_back(-99.);
       }
 
       m_prt.push_back(predicted);
@@ -696,13 +714,17 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_volumeID.clear();
     m_layerID.clear();
     m_moduleID.clear();
-    m_lx_uncalib.clear();
-    m_ly_uncalib.clear();
-    m_err_x_uncalib.clear();
-    m_err_y_uncalib.clear();
-    m_x_uncalib.clear();
-    m_y_uncalib.clear();
-    m_z_uncalib.clear();
+    m_lx_hit.clear();
+    m_ly_hit.clear();
+    m_x_hit.clear();
+    m_y_hit.clear();
+    m_z_hit.clear();
+    m_res_x_hit.clear();
+    m_res_y_hit.clear();
+    m_err_x_hit.clear();
+    m_err_y_hit.clear();
+    m_pull_x_hit.clear();
+    m_pull_y_hit.clear();
 
     m_prt.clear();
     m_eLOC0_prt.clear();
