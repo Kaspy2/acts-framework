@@ -3,7 +3,10 @@ set(_sources
   src/Framework/BareAlgorithm.cpp
   src/Framework/Sequencer.cpp
   src/Random/RandomNumbersSvc.cpp
-  src/Utilities/Paths.cpp)
+  src/Utilities/Paths.cpp
+  src/Utilities/Helpers.cpp
+  src/Validation/EffPlotTool.cpp
+  src/Validation/ResPlotTool.cpp)
 
 add_library(ACTFramework SHARED ${_sources})
 target_include_directories(

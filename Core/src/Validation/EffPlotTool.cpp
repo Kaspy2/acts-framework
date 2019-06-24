@@ -51,14 +51,14 @@ FW::EffPlotTool::write()
 }
 
 void
-FW::EffPlotTool::fill(const Track&             track,
+FW::EffPlotTool::fill(const TrackStateVector&  trackStates,
                       const Data::SimParticle& truthParticle)
 {
   int nSmoothed = 0;
-  for (auto& state : track) {
+  for (auto& state : trackStates) {
     if (state.parameter.smoothed) nSmoothed++;
   }
-  ACTS_DEBUG("There are " << track.size() << " states in total and "
+  ACTS_DEBUG("There are " << trackStates.size() << " states in total and "
                           << nSmoothed
                           << " of them are processed.");
 

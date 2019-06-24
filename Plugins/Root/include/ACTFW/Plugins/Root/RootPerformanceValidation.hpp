@@ -32,12 +32,12 @@ namespace Root {
   using Identifier  = Acts::GeometryID;
   using Measurement = Acts::
       Measurement<Identifier, Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_1>;
-  using TrackState = Acts::TrackState<Identifier, Acts::BoundParameters>;
-  using TrackMap   = std::map<barcode_type, std::vector<TrackState>>;
-  using Track
-      = std::vector<Acts::TrackState<Identifier, Acts::BoundParameters>>;
-  using TruthTrack = std::vector<Data::SimHit<Data::SimParticle>>;
+  using TrackState        = Acts::TrackState<Identifier, Acts::BoundParameters>;
+  using TrackMap          = std::map<barcode_type, std::vector<TrackState>>;
+  using SimParticleVector = std::vector<Data::SimHit<Data::SimParticle>>;
 
+  /// @class RootPerformanceValidation
+  ///
   /// Write out the residual and pull of track parameters and efficiency, i.e.
   /// fraction of smoothed track
   //  into output file

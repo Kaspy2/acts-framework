@@ -7,6 +7,7 @@ set(_common_libraries
   ACTFWDigitization
   ACTFWExamplesCommon
   ACTFWFatras
+  ACTFWFitting
   ACTFWObjPlugin
   ACTFWRootPlugin
   ActsFrameworkGenerators

@@ -61,6 +61,9 @@ FW::Root::RootPerformanceValidation::~RootPerformanceValidation()
 FW::ProcessCode
 FW::Root::RootPerformanceValidation::endRun()
 {
+  // fill residual and pull details into additional hists
+  m_resPlotTool->refinement();
+
   if (m_outputFile) {
     m_outputFile->cd();
     m_resPlotTool->write();
@@ -80,10 +83,15 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
   m_eventNr = ctx.eventNumber;
 
   // Read truth particles from input collection
-  const std::vector<FW::Data::SimVertex<>>* simulatedEvent = nullptr;
-  if (ctx.eventStore.get(m_cfg.simulatedEventCollection, simulatedEvent)
-      == FW::ProcessCode::ABORT)
-    return FW::ProcessCode::ABORT;
+  const std::vector<Data::SimVertex<>>* simulatedEvent = nullptr;
+  simulatedEvent = &ctx.eventStore.get<std::vector<Data::SimVertex<>>>(
+      m_cfg.simulatedEventCollection);
+  if (!simulatedEvent) {
+    throw std::ios_base::failure("Retrieve truth particle collection "
+                                 + m_cfg.simulatedEventCollection
+                                 + " failure!");
+  }
+
   ACTS_DEBUG("Read collection '" << m_cfg.simulatedEventCollection << "' with "
                                  << simulatedEvent->size()
                                  << " vertices");
@@ -91,12 +99,16 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
   // Read truth hits from input collection
   const FW::DetectorData<geo_id_value, Data::SimHit<Data::SimParticle>>* simHits
       = nullptr;
-  if (ctx.eventStore.get(m_cfg.simulatedHitCollection, simHits)
-      == FW::ProcessCode::ABORT) {
+  simHits
+      = &ctx.eventStore.get<FW::DetectorData<geo_id_value,
+                                             Data::SimHit<Data::SimParticle>>>(
+          m_cfg.simulatedHitCollection);
+  if (!simHits) {
     throw std::ios_base::failure("Retrieve truth hit collection "
                                  + m_cfg.simulatedHitCollection
                                  + " failure!");
   }
+
   ACTS_DEBUG("Retrieved hit data '" << m_cfg.simulatedHitCollection
                                     << "' from event store.");
   // Get the map of truth particle
@@ -142,7 +154,7 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
     }
 
     // find the truth hits for this track
-    TruthTrack truthTrack;
+    SimParticleVector truthTrack;
     for (auto& state : track.second) {
       // get the geometry ID
       auto geoID = state.referenceSurface().geoID();
@@ -185,13 +197,10 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
     }  // all states
 
     // fill the plots
-    m_resPlotTool->fill(track.second, truthTrack);
+    m_resPlotTool->fill(ctx.geoContext, track.second, truthTrack);
     m_effPlotTool->fill(track.second, truthParticle);
 
   }  // all tracks
-
-  // fill residual and pull details into additional hists
-  m_resPlotTool->refinement();
 
   return ProcessCode::SUCCESS;
 }

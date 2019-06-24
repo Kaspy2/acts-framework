@@ -50,6 +50,7 @@ FW::Root::RootTrackWriter::RootTrackWriter(
   else {
     // I/O parameters
     m_outputTree->Branch("event_nr", &m_eventNr);
+    m_outputTree->Branch("track_nr", &m_trackNr);
     m_outputTree->Branch("t_barcode", &m_t_barcode, "t_barcode/l");
     m_outputTree->Branch("t_charge", &m_t_charge);
     m_outputTree->Branch("t_vx", &m_t_vx);
@@ -216,8 +217,9 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
 
   // Read truth particles from input collection
   const std::vector<Data::SimVertex<>>* simulatedEvent = nullptr;
-  if (ctx.eventStore.get(m_cfg.simulatedEventCollection, simulatedEvent)
-      == FW::ProcessCode::ABORT) {
+  simulatedEvent = &ctx.eventStore.get<std::vector<Data::SimVertex<>>>(
+      m_cfg.simulatedEventCollection);
+  if (!simulatedEvent) {
     throw std::ios_base::failure("Retrieve truth particle collection "
                                  + m_cfg.simulatedEventCollection
                                  + " failure!");
@@ -230,8 +232,11 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
   // Read truth hits from input collection
   const FW::DetectorData<geo_id_value, Data::SimHit<Data::SimParticle>>* simHits
       = nullptr;
-  if (ctx.eventStore.get(m_cfg.simulatedHitCollection, simHits)
-      == FW::ProcessCode::ABORT) {
+  simHits
+      = &ctx.eventStore.get<FW::DetectorData<geo_id_value,
+                                             Data::SimHit<Data::SimParticle>>>(
+          m_cfg.simulatedHitCollection);
+  if (!simHits) {
     throw std::ios_base::failure("Retrieve truth hit collection "
                                  + m_cfg.simulatedHitCollection
                                  + " failure!");
@@ -277,9 +282,10 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
   m_eventNr = ctx.eventNumber;
 
   // Loop over the tracks
+  int iTrack = 0;
   for (auto& track : tracks) {
     /// collect the information
-
+    m_trackNr = iTrack;
     // get the truth particle info
     m_t_barcode = track.first;
     if (particles.find(m_t_barcode) != particles.end()) {
@@ -317,14 +323,14 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
       m_moduleID.push_back(geoID.value(Acts::GeometryID::sensitive_mask));
 
       // get the uncalibrated measurement
-      auto meas = boost::get<Measurement>(*state.measurement.uncalibrated);
+      auto meas = std::get<Measurement>(*state.measurement.uncalibrated);
       // get local position
       Acts::Vector2D local(meas.parameters()[Acts::ParDef::eLOC_0],
                            meas.parameters()[Acts::ParDef::eLOC_1]);
       // get global position
       Acts::Vector3D global(0, 0, 0);
       Acts::Vector3D mom(1, 1, 1);
-      meas.referenceSurface().localToGlobal(local, mom, global);
+      meas.referenceSurface().localToGlobal(ctx.geoContext, local, mom, global);
 
       // get measurement covariance
       auto  cov  = meas.covariance();
@@ -369,7 +375,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         // get local truth position
         Acts::Vector2D hitlocal;
         meas.referenceSurface().globalToLocal(
-            truthHit.position, truthHit.direction, hitlocal);
+            ctx.geoContext, truthHit.position, truthHit.direction, hitlocal);
         // push the truth hit info
         m_t_x.push_back(truthHit.position.x());
         m_t_y.push_back(truthHit.position.y());
@@ -401,7 +407,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
         m_t_dy.push_back(0.);
         m_t_dz.push_back(0.);
       }
-
+      // push the truth parameter at this track State
       m_t_eLOC0.push_back(truthLOC0);
       m_t_eLOC1.push_back(truthLOC1);
       m_t_ePHI.push_back(truthPHI);
@@ -816,6 +822,7 @@ FW::Root::RootTrackWriter::writeT(const AlgorithmContext& ctx,
     m_eta_smt.clear();
     m_pT_smt.clear();
 
+    iTrack++;
   }  // all tracks
 
   return ProcessCode::SUCCESS;

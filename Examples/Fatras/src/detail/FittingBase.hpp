@@ -80,17 +80,13 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
   fittingConfig.randomNumberSvc = randomNumberSvc;
 
   // Finally the fitting algorithm
-  auto fittingAlgorithm
-      = std::make_shared<FittingAlgorithm>(fittingConfig, logLevel);
-
-  // Finalize the squencer setting and run
-  sequencer.appendEventAlgorithms({fittingAlgorithm});
+  sequencer.addAlgorithm(
+      std::make_shared<FittingAlgorithm>(fittingConfig, logLevel));
 
   // Output directory
   std::string outputDir = vm["output-dir"].template as<std::string>();
 
   // Write fitted tracks as ROOT files
-  std::shared_ptr<FW::Root::RootTrackWriter> tWriterRoot;
   if (vm["output-root"].template as<bool>()) {
     FW::Root::RootTrackWriter::Config tWriterRootConfig;
     tWriterRootConfig.trackCollection = fittingConfig.trackCollection;
@@ -101,14 +97,11 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
     tWriterRootConfig.filePath
         = FW::joinPaths(outputDir, fittingConfig.trackCollection + ".root");
     tWriterRootConfig.treeName = fittingConfig.trackCollection;
-    tWriterRoot
-        = std::make_shared<FW::Root::RootTrackWriter>(tWriterRootConfig);
-
-    sequencer.addWriters({tWriterRoot});
+    sequencer.addWriter(
+        std::make_shared<FW::Root::RootTrackWriter>(tWriterRootConfig));
   }
 
   // Write performance plots as ROOT files
-  std::shared_ptr<FW::Root::RootPerformanceValidation> perfValidation;
   if (vm["output-root"].template as<bool>()) {
     FW::ResPlotTool::Config                     resPlotToolConfig;
     FW::Root::RootPerformanceValidation::Config perfValidationConfig;
@@ -120,10 +113,8 @@ setupFittingAlgorithm(bfield_t                                      fieldMap,
         = fittingConfig.simulatedHitCollection;
     perfValidationConfig.filePath = FW::joinPaths(
         outputDir, fittingConfig.trackCollection + "_performance.root");
-    perfValidation = std::make_shared<FW::Root::RootPerformanceValidation>(
-        perfValidationConfig);
-
-    sequencer.addWriters({perfValidation});
+    sequencer.addWriter(std::make_shared<FW::Root::RootPerformanceValidation>(
+        perfValidationConfig));
   }
 }
 
@@ -147,13 +138,36 @@ setupFitting(vmap_t&                                       vm,
              std::shared_ptr<FW::RandomNumbersSvc>         randomNumberSvc)
 {
   // create BField service
-  auto bField = FW::Options::readBField<vmap_t>(vm);
-  // a charged propagator
-  if (bField.first) {
-    // create the shared field
-    using BField = Acts::SharedBField<Acts::InterpolatedBFieldMap>;
-    BField fieldMap(bField.first);
-    // now setup of the fitting algorithm and append it to the sequencer
+  auto bField  = FW::Options::readBField<po::variables_map>(vm);
+  auto field2D = std::get<std::shared_ptr<InterpolatedBFieldMap2D>>(bField);
+  auto field3D = std::get<std::shared_ptr<InterpolatedBFieldMap3D>>(bField);
+
+  if (field2D) {
+    // Define the interpolated b-field
+    using BField = Acts::SharedBField<InterpolatedBFieldMap2D>;
+    BField fieldMap(field2D);
+    // now setup of the fitting and append it to the sequencer
+    setupFittingAlgorithm(std::move(fieldMap),
+                          sequencer,
+                          vm,
+                          tGeometry,
+                          barcodeSvc,
+                          randomNumberSvc);
+  } else if (field3D) {
+    // Define the interpolated b-field
+    using BField = Acts::SharedBField<InterpolatedBFieldMap3D>;
+    BField fieldMap(field3D);
+    // now setup of the fitting and append it to the sequencer
+    setupFittingAlgorithm(std::move(fieldMap),
+                          sequencer,
+                          vm,
+                          tGeometry,
+                          barcodeSvc,
+                          randomNumberSvc);
+  } else if (vm["bf-context-scalable"].template as<bool>()) {
+    using SField = FW::BField::ScalableBField;
+    SField fieldMap(*std::get<std::shared_ptr<SField>>(bField));
+    // now setup of the fitting and append it to the sequencer
     setupFittingAlgorithm(std::move(fieldMap),
                           sequencer,
                           vm,
@@ -161,10 +175,10 @@ setupFitting(vmap_t&                                       vm,
                           barcodeSvc,
                           randomNumberSvc);
   } else {
-    // create the shared field
+    // Create the constant  field
     using CField = Acts::ConstantBField;
-    CField fieldMap(*bField.second);
-    // now setup of the fitting algorithm and append it to the sequencer
+    CField fieldMap(*std::get<std::shared_ptr<CField>>(bField));
+    // now setup of the fitting and append it to the sequencer
     setupFittingAlgorithm(std::move(fieldMap),
                           sequencer,
                           vm,

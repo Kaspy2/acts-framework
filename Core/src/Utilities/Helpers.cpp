@@ -47,30 +47,23 @@ namespace PlotHelpers {
   void
   fillHisto(TH1F* hist, float value, float weight)
   {
-    if (hist == nullptr) {
-      std::bad_alloc();
-    } else {
-      hist->Fill(value, weight);
-    }
+    assert(hist != nullptr);
+    hist->Fill(value, weight);
   }
 
   void
   fillHisto(TH2F* hist, float xValue, float yValue, float weight)
   {
-    if (hist == nullptr) {
-      std::bad_alloc();
-    } else {
-      hist->Fill(xValue, yValue, weight);
-    }
+    assert(hist != nullptr);
+    hist->Fill(xValue, yValue, weight);
   }
 
   void
   anaHisto(TH1D* inputHist, int j, TH1F* meanHist, TH1F* widthHist)
   {
     // evaluate mean and width via the Gauss fit
-    if (inputHist == nullptr) {
-      std::bad_alloc();
-    } else if (inputHist->GetEntries() > 0) {
+    assert(inputHist != nullptr);
+    if (inputHist->GetEntries() > 0) {
       TFitResultPtr r = inputHist->Fit("gaus", "QS0");
       if (r.Get() and ((r->Status() % 1000) == 0)) {
         // fill the mean and width into 'j'th bin of the meanHist and widthHist,
@@ -111,21 +104,15 @@ namespace PlotHelpers {
   void
   fillEff(TEfficiency* efficiency, float value, bool status)
   {
-    if (efficiency == nullptr) {
-      std::bad_alloc();
-    } else {
-      efficiency->Fill(status, value);
-    }
+    assert(efficiency != nullptr);
+    efficiency->Fill(status, value);
   }
 
   void
   fillEff(TEfficiency* efficiency, float valueX, float valueY, bool status)
   {
-    if (efficiency == nullptr) {
-      std::bad_alloc();
-    } else {
-      efficiency->Fill(status, valueX, valueY);
-    }
+    assert(efficiency != nullptr);
+    efficiency->Fill(status, valueX, valueY);
   }
 }  // namespace PlotHelpers
 

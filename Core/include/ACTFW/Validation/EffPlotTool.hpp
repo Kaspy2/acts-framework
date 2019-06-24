@@ -32,7 +32,7 @@ class EffPlotTool
   using Identifier  = Acts::GeometryID;
   using Measurement = Acts::
       Measurement<Identifier, Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_1>;
-  using Track
+  using TrackStateVector
       = std::vector<Acts::TrackState<Identifier, Acts::BoundParameters>>;
 
 public:
@@ -59,7 +59,8 @@ public:
   /// @param track a vector of trackStates
   /// @param truthParticle a vector of truth hits
   void
-  fill(const Track& track, const Data::SimParticle& truthParticle);
+  fill(const TrackStateVector&  trackStates,
+       const Data::SimParticle& truthParticle);
 
   /// @brief write the efficiency plots to file
   void

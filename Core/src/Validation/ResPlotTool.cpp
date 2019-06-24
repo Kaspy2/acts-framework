@@ -192,19 +192,21 @@ FW::ResPlotTool::write()
 }
 
 void
-FW::ResPlotTool::fill(const Track& track, const TruthTrack& truthTrack)
+FW::ResPlotTool::fill(const Acts::GeometryContext& gctx,
+                      const TrackStateVector&      trackStates,
+                      const SimParticleVector&     truthParticles)
 {
 
   // Get the map of truth hits with geoID
   ACTS_DEBUG("Get the truth hits.");
   std::map<Acts::GeometryID, Data::SimHit<Data::SimParticle>> simHits;
-  for (auto& hit : truthTrack) {
+  for (auto& hit : truthParticles) {
     auto geoID = hit.surface->geoID();
     simHits.insert(std::make_pair(geoID, hit));
   }
 
   // get the distribution of residual/pull
-  for (auto& state : track) {
+  for (auto& state : trackStates) {
     ParVector_t truthParameter;
     float       truthEta, truthR, truthZ;
     auto        geoID = state.referenceSurface().geoID();
@@ -213,7 +215,7 @@ FW::ResPlotTool::fill(const Track& track, const TruthTrack& truthTrack)
       Data::SimHit<Data::SimParticle> truthHit = simHits.find(geoID)->second;
       Acts::Vector2D                  hitlocal;
       state.referenceSurface().globalToLocal(
-          truthHit.position, truthHit.direction, hitlocal);
+          gctx, truthHit.position, truthHit.direction, hitlocal);
       truthParameter[Acts::ParDef::eLOC_0] = hitlocal.x();
       truthParameter[Acts::ParDef::eLOC_1] = hitlocal.y();
       truthParameter[Acts::ParDef::ePHI]   = phi(truthHit.particle.momentum());

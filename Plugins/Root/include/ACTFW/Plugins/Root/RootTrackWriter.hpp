@@ -32,7 +32,11 @@ namespace Root {
       Measurement<Identifier, Acts::ParDef::eLOC_0, Acts::ParDef::eLOC_1>;
   using TrackState = Acts::TrackState<Identifier, Acts::BoundParameters>;
   using TrackMap   = std::map<barcode_type, std::vector<TrackState>>;
-  /// Write out a track (i.e. a vector of trackState at the moment) into a TTree
+
+  /// @class RootTrackWriter
+  ///
+  /// Write out a track (i.e. a map of truth particle barcode and a vector of
+  /// trackState at the moment) into a TTree
   ///
   /// Safe to use from multiple writer threads - uses a std::mutex lock.
   ///
@@ -86,19 +90,20 @@ namespace Root {
     TFile*     m_outputFile{nullptr};  ///< The output file
     TTree*     m_outputTree{nullptr};  ///< The output tree
     int        m_eventNr{0};           ///< the event number
+    int        m_trackNr{0};           ///< the track number
 
     unsigned long m_t_barcode{0};  ///< Truth particle barcode
     int           m_t_charge{0};   ///< Truth particle charge
     float         m_t_vx{0.};      ///< Truth particle vertex x
     float         m_t_vy{0.};      ///< Truth particle vertex y
     float         m_t_vz{0.};      ///< Truth particle vertex z
-    float         m_t_eta{0.};     ///< Truth particle vertex eta
     float         m_t_px{0.};      ///< Truth particle initial momentum px
     float         m_t_py{0.};      ///< Truth particle initial momentum py
     float         m_t_pz{0.};      ///< Truth particle initial momentum pz
     float         m_t_theta{0.};   ///< Truth particle initial momentum theta
     float         m_t_phi{0.};     ///< Truth particle initial momentum phi
     float         m_t_pT{0.};      ///< Truth particle initial momentum pT
+    float         m_t_eta{0.};     ///< Truth particle initial momentum eta
 
     std::vector<float> m_t_x;  ///< Global truth hit position x
     std::vector<float> m_t_y;  ///< Global truth hit position y
@@ -158,10 +163,10 @@ namespace Root {
     std::vector<float> m_x_prt;            ///< predicted global x
     std::vector<float> m_y_prt;            ///< predicted global y
     std::vector<float> m_z_prt;            ///< predicted global z
-    std::vector<float> m_eta_prt;          ///< predicted global eta
     std::vector<float> m_px_prt;           ///< predicted momentum px
     std::vector<float> m_py_prt;           ///< predicted momentum py
     std::vector<float> m_pz_prt;           ///< predicted momentum pz
+    std::vector<float> m_eta_prt;          ///< predicted momentum eta
     std::vector<float> m_pT_prt;           ///< predicted momentum pT
 
     int m_nFiltered{0};        ///< number of states with filtered parameter
@@ -190,10 +195,10 @@ namespace Root {
     std::vector<float> m_x_flt;            ///< filtered global x
     std::vector<float> m_y_flt;            ///< filtered global y
     std::vector<float> m_z_flt;            ///< filtered global z
-    std::vector<float> m_eta_flt;          ///< filtered global eta
     std::vector<float> m_px_flt;           ///< filtered momentum px
     std::vector<float> m_py_flt;           ///< filtered momentum py
     std::vector<float> m_pz_flt;           ///< filtered momentum pz
+    std::vector<float> m_eta_flt;          ///< filtered momentum eta
     std::vector<float> m_pT_flt;           ///< filtered momentum pT
 
     int m_nSmoothed{0};        ///< number of states with smoothed parameter
@@ -222,10 +227,10 @@ namespace Root {
     std::vector<float> m_x_smt;            ///< smoothed global x
     std::vector<float> m_y_smt;            ///< smoothed global y
     std::vector<float> m_z_smt;            ///< smoothed global z
-    std::vector<float> m_eta_smt;          ///< smoothed global eta
     std::vector<float> m_px_smt;           ///< smoothed momentum px
     std::vector<float> m_py_smt;           ///< smoothed momentum py
     std::vector<float> m_pz_smt;           ///< smoothed momentum pz
+    std::vector<float> m_eta_smt;          ///< smoothed momentum eta
     std::vector<float> m_pT_smt;           ///< smoothed momentum pT
   };
 
