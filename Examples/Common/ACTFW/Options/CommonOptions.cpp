@@ -114,7 +114,10 @@ FW::Options::addOutputOptions(boost::program_options::options_description& opt)
       "Switch on to write '.obj' ouput file(s).")(
       "output-json",
       value<bool>()->default_value(false),
-      "Switch on to write '.json' ouput file(s).");
+      "Switch on to write '.json' ouput file(s).")(
+      "output-txt",
+      value<bool>()->default_value(false),
+      "Switch on to write '.txt' ouput file(s).");
 }
 
 void
