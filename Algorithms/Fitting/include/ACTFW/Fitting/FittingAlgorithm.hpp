@@ -59,6 +59,10 @@ public:
     kalman_Fitter_t kFitter;
     /// FW random number service
     std::shared_ptr<RandomNumbersSvc> randomNumberSvc = nullptr;
+    /// Gaussian sigma used to smear the truth track parameter
+    std::vector<double> parameterSigma = {10, 10, 0.02, 0.02, 1};
+    /// Gaussian sigma used to smear the truth hit
+    std::vector<double> measurementSigma = {30, 30};
   };
 
   /// Constructor of the fitting algorithm

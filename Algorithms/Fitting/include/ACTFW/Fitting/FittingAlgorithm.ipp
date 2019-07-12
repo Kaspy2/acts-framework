@@ -85,8 +85,8 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
               context.geoContext, hit.position, mom, local);
 
           // smear the truth hit with a gaussian and set the covariance
-          double                  resX = 30. * Acts::units::_um;
-          double                  resY = 30. * Acts::units::_um;
+          double resX = m_cfg.measurementSigma[0] * Acts::units::_um;
+          double resY = m_cfg.measurementSigma[1] * Acts::units::_um;
           Acts::ActsSymMatrixD<2> cov2D;
           cov2D << resX * resX, 0., 0., resY * resY;
 
@@ -159,11 +159,12 @@ FW::FittingAlgorithm<kalman_Fitter_t>::execute(
     double fqOp   = q / fp;
 
     // set the smearing error
-    double loc0Res  = 10 * Acts::units::_um;
-    double loc1Res  = 10 * Acts::units::_um;
-    double phiRes   = 0.02;
-    double thetaRes = 0.02;
-    double qOpRes   = -q / (fp * fp) * 1.0 * Acts::units::_GeV;
+    double loc0Res  = m_cfg.parameterSigma[0] * Acts::units::_um;
+    double loc1Res  = m_cfg.parameterSigma[1] * Acts::units::_um;
+    double phiRes   = m_cfg.parameterSigma[2];
+    double thetaRes = m_cfg.parameterSigma[3];
+    double qOpRes
+        = -q / (fp * fp) * m_cfg.parameterSigma[4] * Acts::units::_GeV;
 
     // prepare the covariance
     Acts::ActsSymMatrixD<5> cov;

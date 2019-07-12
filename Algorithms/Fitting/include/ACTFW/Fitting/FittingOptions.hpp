@@ -39,7 +39,15 @@ namespace Options {
         "The collection of simulated hits")(
         "fitted-tracks",
         po::value<std::string>()->default_value("fitted-tracks"),
-        "The collection of output tracks");
+        "The collection of output tracks")(
+        "initial-parameter-sigma",
+        po::value<read_range>()->multitoken()->default_value(
+            {10., 10., 0.02, 0.02, 1}),
+        "Gaussian sigma used to smear the truth track parameter Loc0 [um], "
+        "Loc1 [um], phi, theta, q/p [-q/(p*p)*GeV]")(
+        "measurement-sigma",
+        po::value<read_range>()->multitoken()->default_value({30., 30.}),
+        "Gaussian sigma used to smear the truth hit Loc0 [um], Loc1 [um]");
   }
 
   /// @brief read the fitter specific options and return a Config file
@@ -61,6 +69,11 @@ namespace Options {
         = vm["fatras-sim-particles"].template as<std::string>();
     fittingConfig.trackCollection
         = vm["fitted-tracks"].template as<std::string>();
+
+    fittingConfig.parameterSigma
+        = vm["initial-parameter-sigma"].template as<read_range>();
+    fittingConfig.measurementSigma
+        = vm["measurement-sigma"].template as<read_range>();
 
     // and return the config
     return fittingConfig;
