@@ -131,10 +131,8 @@ FW::TruthVerticesToTracksAlgorithm::execute(
                                                         newTrackParams,
                                                         perigeeSurface));
       } else {
-        trackCollection.push_back(Acts::BoundParameters(context.geoContext,
-                                                        std::move(covMat),
-                                                        newTrackParams,
-                                                        perigeeSurface));
+        trackCollection.push_back(Acts::BoundParameters(
+            context.geoContext, nullptr, newTrackParams, perigeeSurface));
       }
 
     }  // end iteration over all particle at vertex
