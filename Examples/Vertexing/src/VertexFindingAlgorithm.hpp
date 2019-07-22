@@ -24,25 +24,6 @@
 
 namespace FWE {
 
-typedef Acts::
-    FullBilloirVertexFitter<Acts::ConstantBField,
-                            Acts::BoundParameters,
-                            Acts::
-                                Propagator<Acts::
-                                               EigenStepper<Acts::
-                                                                ConstantBField>>>
-        BilloirFitter;
-
-typedef Acts::
-    IterativeVertexFinder<Acts::ConstantBField,
-                          Acts::BoundParameters,
-                          Acts::
-                              Propagator<Acts::
-                                             EigenStepper<Acts::
-                                                              ConstantBField>>,
-                          BilloirFitter>
-        VertexFinder;
-
 class VertexFindingAlgorithm : public FW::BareAlgorithm
 {
 public:
@@ -51,8 +32,8 @@ public:
     /// Input track collection
     std::string trackCollection;
 
-    /// Vertex finder
-    std::shared_ptr<VertexFinder> vertexFinder = nullptr;
+    /// The magnetic field
+    Acts::Vector3D bField;
   };
 
   /// Constructor

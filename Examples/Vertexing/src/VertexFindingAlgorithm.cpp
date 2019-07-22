@@ -9,12 +9,15 @@
 #include "VertexFindingAlgorithm.hpp"
 #include "ACTFW/Random/RandomNumbersSvc.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Units.hpp"
+#include "Acts/Vertexing/FullBilloirVertexFitter.hpp"
+#include "Acts/Vertexing/IterativeVertexFinder.hpp"
 
 #include "Acts/Vertexing/LinearizedTrack.hpp"
 #include "Acts/Vertexing/LinearizedTrackFactory.hpp"
@@ -37,9 +40,34 @@ FW::ProcessCode
 FWE::VertexFindingAlgorithm::execute(const FW::AlgorithmContext& context) const
 {
 
+  using Propagator = Acts::Propagator<Acts::EigenStepper<Acts::ConstantBField>>;
+  using VertexFitter = Acts::FullBilloirVertexFitter<Acts::ConstantBField,
+                                                     Acts::BoundParameters,
+                                                     Propagator>;
+  using VertexFinder = Acts::IterativeVertexFinder<Acts::ConstantBField,
+                                                   Acts::BoundParameters,
+                                                   Propagator,
+                                                   VertexFitter>;
+
   const auto& inputTrackCollection
       = context.eventStore.get<std::vector<Acts::BoundParameters>>(
           m_cfg.trackCollection);
+
+  // Set up constant B-Field
+  Acts::ConstantBField bField(m_cfg.bField);
+
+  // Set up Eigenstepper
+  Acts::EigenStepper<Acts::ConstantBField> stepper(bField);
+  // Set up propagator with void navigator
+  Propagator propagator(stepper);
+
+  // Set up Billoir Vertex Fitter
+  VertexFitter::Config vertexFitterCfg(bField, propagator);
+  VertexFitter         vertexFitter(vertexFitterCfg);
+
+  // Set up Iterative Vertex Finder
+  VertexFinder::Config finderCfg(bField, std::move(vertexFitter), propagator);
+  VertexFinder         vertexFinder(finderCfg);
 
   // The geometry context
   Acts::GeometryContext geoContext;
@@ -51,7 +79,7 @@ FWE::VertexFindingAlgorithm::execute(const FW::AlgorithmContext& context) const
       geoContext, magFieldContext);
 
   // Find vertices
-  auto res = m_cfg.vertexFinder->find(inputTrackCollection, vFinderOptions);
+  auto res = vertexFinder.find(inputTrackCollection, vFinderOptions);
 
   if (res.ok()) {
     // Retrieve vertices found by vertex finder

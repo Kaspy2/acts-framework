@@ -10,11 +10,6 @@
 #include <memory>
 
 #include "Acts/EventData/TrackParameters.hpp"
-#include "Acts/MagneticField/ConstantBField.hpp"
-#include "Acts/Propagator/EigenStepper.hpp"
-#include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Vertexing/FullBilloirVertexFitter.hpp"
-#include "Acts/Vertexing/IterativeVertexFinder.hpp"
 
 #include "ACTFW/Barcode/BarcodeSvc.hpp"
 #include "ACTFW/Framework/Sequencer.hpp"
@@ -29,9 +24,8 @@
 #include "VertexFindingAlgorithm.hpp"
 
 #include "ACTFW/Generators/Pythia8ProcessGenerator.hpp"
-#include "ACTFW/Simulation/EventToTrackConverter.hpp"
-#include "ACTFW/Simulation/EventToTrackConverterOptions.hpp"
-#include "ACTFW/Simulation/TrackSelector.hpp"
+#include "ACTFW/TruthTracking/TrackSelector.hpp"
+#include "ACTFW/TruthTracking/TruthVerticesToTracks.hpp"
 
 using namespace FW;
 
@@ -48,7 +42,6 @@ main(int argc, char* argv[])
   Options::addRandomNumbersOptions(desc);
   Options::addPythia8Options(desc);
   Options::addOutputOptions(desc);
-  Options::addEventToTrackConverterOptions(desc);
   auto vm = Options::parse(desc, argc, argv);
   if (vm.empty()) {
     return EXIT_FAILURE;
@@ -57,10 +50,9 @@ main(int argc, char* argv[])
   auto logLevel = Options::readLogLevel(vm);
 
   // basic services
-  RandomNumbersSvc::Config rndCfg;
-  rndCfg.seed  = 123;
-  auto rnd     = std::make_shared<RandomNumbersSvc>(rndCfg);
-  auto barcode = std::make_shared<BarcodeSvc>(
+  RandomNumbersSvc::Config rndCfg  = Options::readRandomNumbersConfig(vm);
+  auto                     rnd     = std::make_shared<RandomNumbersSvc>(rndCfg);
+  auto                     barcode = std::make_shared<BarcodeSvc>(
       BarcodeSvc::Config(), Acts::getDefaultLogger("BarcodeSvc", logLevel));
 
   // Set up event generator producing one single hard collision
@@ -69,20 +61,15 @@ main(int argc, char* argv[])
   evgenCfg.randomNumbers          = rnd;
   evgenCfg.barcodeSvc             = barcode;
 
-  // Set up constant B-Field
-  Acts::ConstantBField bField(Acts::Vector3D(0., 0., 1.) * Acts::units::_T);
-  // Set up Eigenstepper
-  Acts::EigenStepper<Acts::ConstantBField> stepper(bField);
-  // Set up propagator with void navigator
-  Acts::Propagator<Acts::EigenStepper<Acts::ConstantBField>> propagator(
-      stepper);
+  // Set magnetic field
+  Acts::Vector3D bField(0., 0., 1. * Acts::units::_T);
 
-  // Set up event to track converter algorithm
-  EventToTrackConverterAlgorithm::Config trkConvConfig
-      = Options::readEventToTrackConverterConfig(vm);
-  trkConvConfig.randomNumberSvc = rnd;
-  trkConvConfig.bField          = bField;
-  trkConvConfig.inputCollection = evgenCfg.output;
+  // Set up TruthVerticesToTracks converter algorithm
+  TruthVerticesToTracksAlgorithm::Config trkConvConfig;
+  trkConvConfig.randomNumberSvc  = rnd;
+  trkConvConfig.bField           = bField;
+  trkConvConfig.inputCollection  = evgenCfg.output;
+  trkConvConfig.outputCollection = "all_tracks";
 
   // Set up track selector
   TrackSelector::Config selectorConfig;
@@ -93,26 +80,17 @@ main(int argc, char* argv[])
   selectorConfig.ptMin       = 400. * Acts::units::_MeV;
   selectorConfig.keepNeutral = false;
 
-  // Set up Billoir Vertex Fitter
-  FWE::BilloirFitter::Config vertexFitterCfg(bField, propagator);
-
-  FWE::BilloirFitter vFitter(vertexFitterCfg);
-
-  // Set up Iterative Vertex Finder
-  FWE::VertexFinder::Config finderCfg(bField, std::move(vFitter), propagator);
-  auto vFinder = std::make_shared<FWE::VertexFinder>(finderCfg);
-
   // Add the finding algorithm
   FWE::VertexFindingAlgorithm::Config vertexFindingCfg;
   vertexFindingCfg.trackCollection = selectorConfig.output;
-  vertexFindingCfg.vertexFinder    = vFinder;
+  vertexFindingCfg.bField          = bField;
 
   Sequencer::Config sequencerCfg = Options::readSequencerConfig(vm);
   Sequencer         sequencer(sequencerCfg);
 
   sequencer.addReader(std::make_shared<EventGenerator>(evgenCfg, logLevel));
 
-  sequencer.addAlgorithm(std::make_shared<EventToTrackConverterAlgorithm>(
+  sequencer.addAlgorithm(std::make_shared<TruthVerticesToTracksAlgorithm>(
       trkConvConfig, logLevel));
 
   sequencer.addAlgorithm(
@@ -121,7 +99,5 @@ main(int argc, char* argv[])
   sequencer.addAlgorithm(std::make_shared<FWE::VertexFindingAlgorithm>(
       vertexFindingCfg, logLevel));
 
-  sequencer.run();
-
-  return 0;
+  return sequencer.run();
 }
