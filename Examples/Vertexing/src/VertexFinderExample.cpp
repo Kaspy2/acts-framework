@@ -21,11 +21,11 @@
 #include "ACTFW/Random/RandomNumbersSvc.hpp"
 #include "ACTFW/Utilities/Paths.hpp"
 
-#include "VertexFindingAlgorithm.hpp"
-
+#include "ACTFW/Generators/ParticleSelector.hpp"
 #include "ACTFW/Generators/Pythia8ProcessGenerator.hpp"
 #include "ACTFW/TruthTracking/TrackSelector.hpp"
 #include "ACTFW/TruthTracking/TruthVerticesToTracks.hpp"
+#include "VertexFindingAlgorithm.hpp"
 
 using namespace FW;
 
@@ -61,14 +61,23 @@ main(int argc, char* argv[])
   evgenCfg.randomNumbers          = rnd;
   evgenCfg.barcodeSvc             = barcode;
 
+  ParticleSelector::Config ptcSelectorCfg;
+  ptcSelectorCfg.input       = evgenCfg.output;
+  ptcSelectorCfg.output      = "selected_particles";
+  ptcSelectorCfg.absEtaMax   = 2.5;
+  ptcSelectorCfg.rhoMax      = 4 * Acts::units::_mm;
+  ptcSelectorCfg.ptMin       = 400. * Acts::units::_MeV;
+  ptcSelectorCfg.keepNeutral = false;
+
   // Set magnetic field
   Acts::Vector3D bField(0., 0., 1. * Acts::units::_T);
 
   // Set up TruthVerticesToTracks converter algorithm
   TruthVerticesToTracksAlgorithm::Config trkConvConfig;
+  trkConvConfig.doSmearing       = true;
   trkConvConfig.randomNumberSvc  = rnd;
   trkConvConfig.bField           = bField;
-  trkConvConfig.inputCollection  = evgenCfg.output;
+  trkConvConfig.inputCollection  = ptcSelectorCfg.output;
   trkConvConfig.outputCollection = "all_tracks";
 
   // Set up track selector
@@ -89,6 +98,9 @@ main(int argc, char* argv[])
   Sequencer         sequencer(sequencerCfg);
 
   sequencer.addReader(std::make_shared<EventGenerator>(evgenCfg, logLevel));
+
+  sequencer.addAlgorithm(
+      std::make_shared<ParticleSelector>(ptcSelectorCfg, logLevel));
 
   sequencer.addAlgorithm(std::make_shared<TruthVerticesToTracksAlgorithm>(
       trkConvConfig, logLevel));
