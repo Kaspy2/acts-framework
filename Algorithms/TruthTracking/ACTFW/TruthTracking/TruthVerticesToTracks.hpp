@@ -49,9 +49,14 @@ public:
 
     /// Define parameter for pt-dependent IP resolution
     /// of the form sigma_d/z(p_t[GeV]) = A*exp(-B*p_t[GeV]) + C
-    double ipResA = 100.7439 * Acts::units::_um;
-    double ipResB = 0.23055 / Acts::units::_GeV;
+    double ipResA = 30 * Acts::units::_um;
+    double ipResB = 0.3 / Acts::units::_GeV;
     double ipResC = 20. * Acts::units::_um;
+
+    /// Angular resolution
+    double angRes = 0.05;
+    /// q/p resolution factor
+    double qpRes = 0.001;
   };
 
   /// Constructor of the TruthVerticesToTracks algorithm

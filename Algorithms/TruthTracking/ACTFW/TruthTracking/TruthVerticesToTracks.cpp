@@ -94,14 +94,15 @@ FW::TruthVerticesToTracksAlgorithm::execute(
         const double particlePt = Acts::VectorHelpers::perp(ptclMom);
         const double ipRes = m_cfg.ipResA * std::exp(-m_cfg.ipResB * particlePt)
             + m_cfg.ipResC;
+
         // except for IP resolution, following variances are rough guesses
         // Gaussian distribution for IP resolution
         std::normal_distribution<double> gaussDist_IP(0., ipRes);
         // Gaussian distribution for angular resolution
-        std::normal_distribution<double> gaussDist_angular(0., 0.1);
+        std::normal_distribution<double> gaussDist_angular(0., m_cfg.angRes);
         // Gaussian distribution for q/p (momentum) resolution
         std::normal_distribution<double> gaussDist_qp(
-            0., 0.1 * perigeeParameters[4]);
+            0., m_cfg.qpRes * perigeeParameters[4]);
 
         double rn_d0 = gaussDist_IP(rng);
         double rn_z0 = gaussDist_IP(rng);
@@ -114,6 +115,7 @@ FW::TruthVerticesToTracksAlgorithm::execute(
 
         // Update track parameters
         newTrackParams += smrdParamVec;
+
         // Correct for phi and theta wrap
         correctPhiThetaPeriodicity(newTrackParams[2], newTrackParams[3]);
 
@@ -129,8 +131,10 @@ FW::TruthVerticesToTracksAlgorithm::execute(
                                                         newTrackParams,
                                                         perigeeSurface));
       } else {
-        trackCollection.push_back(Acts::BoundParameters(
-            context.geoContext, nullptr, newTrackParams, perigeeSurface));
+        trackCollection.push_back(Acts::BoundParameters(context.geoContext,
+                                                        std::move(covMat),
+                                                        newTrackParams,
+                                                        perigeeSurface));
       }
 
     }  // end iteration over all particle at vertex
