@@ -145,6 +145,8 @@ FW::TruthVerticesToTracksAlgorithm::execute(
 
     // Store track objects in VertexAndTracks
     vertexAndTracks.tracks = trackCollection;
+    // Add to collection
+    vertexAndTracksCollection.push_back(vertexAndTracks);
 
   }  // end iteration over all vertices
 

@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "ACTFW/TruthTracking/TrackSelector.hpp"
+#include "ACTFW/TruthTracking/TruthVerticesToTracks.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -30,11 +31,11 @@ FW::TrackSelector::TrackSelector(const Config& cfg, Acts::Logging::Level level)
 FW::ProcessCode
 FW::TrackSelector::execute(const FW::AlgorithmContext& ctx) const
 {
-  std::vector<Acts::BoundParameters> selected;
+  std::vector<VertexAndTracks> selected;
 
   // get input tracks
   const auto& input
-      = ctx.eventStore.get<std::vector<Acts::BoundParameters>>(m_cfg.input);
+      = ctx.eventStore.get<std::vector<VertexAndTracks>>(m_cfg.input);
 
   auto within = [](double x, double min, double max) {
     return (min <= x) and (x < max);
@@ -53,17 +54,26 @@ FW::TrackSelector::execute(const FW::AlgorithmContext& ctx) const
         and (m_cfg.keepNeutral or (trk.charge() != 0));
   };
 
-  for (const auto& track : input) {
+  for (const auto& vertexAndTracks : input) {
 
-    if (isValidTrack(track)) {
-      selected.push_back(track);
+    VertexAndTracks sel;
+    sel.vertex = vertexAndTracks.vertex;
+
+    // Copy selected tracks over
+    std::copy_if(vertexAndTracks.tracks.begin(),
+                 vertexAndTracks.tracks.end(),
+                 std::back_inserter(sel.tracks),
+                 isValidTrack);
+    // Only retain vertex if it still contains tracks
+    if (not sel.tracks.empty()) {
+      selected.push_back(std::move(sel));
     }
   }
 
   ACTS_DEBUG("event " << ctx.eventNumber << " selected " << selected.size()
                       << " from "
                       << input.size()
-                      << " tracks");
+                      << " vertices.");
 
   // write selected tracks
   ctx.eventStore.add(m_cfg.output, std::move(selected));

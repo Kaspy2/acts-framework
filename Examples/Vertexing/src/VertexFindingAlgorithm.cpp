@@ -8,6 +8,7 @@
 
 #include "VertexFindingAlgorithm.hpp"
 #include "ACTFW/Random/RandomNumbersSvc.hpp"
+#include "ACTFW/TruthTracking/VertexAndTracks.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -49,9 +50,8 @@ FWE::VertexFindingAlgorithm::execute(const FW::AlgorithmContext& context) const
                                                    Propagator,
                                                    VertexFitter>;
 
-  const auto& inputTrackCollection
-      = context.eventStore.get<std::vector<Acts::BoundParameters>>(
-          m_cfg.trackCollection);
+  const auto& input = context.eventStore.get<std::vector<FW::VertexAndTracks>>(
+      m_cfg.trackCollection);
 
   // Set up constant B-Field
   Acts::ConstantBField bField(m_cfg.bField);
@@ -78,6 +78,28 @@ FWE::VertexFindingAlgorithm::execute(const FW::AlgorithmContext& context) const
   Acts::VertexFinderOptions<Acts::BoundParameters> vFinderOptions(
       geoContext, magFieldContext);
 
+  std::vector<Acts::BoundParameters> inputTrackCollection;
+
+  int counte = 0;
+  for (auto& bla : input) {
+    counte += bla.tracks.size();
+  }
+
+  ACTS_INFO("Truth vertices in event: " << input.size());
+
+  for (auto& vertexAndTracks : input) {
+    ACTS_INFO("\t True vertex at (" << vertexAndTracks.vertex.position[0] << ","
+                                    << vertexAndTracks.vertex.position[1]
+                                    << ","
+                                    << vertexAndTracks.vertex.position[2]
+                                    << ") with "
+                                    << vertexAndTracks.tracks.size()
+                                    << " tracks.");
+    inputTrackCollection.insert(inputTrackCollection.end(),
+                                vertexAndTracks.tracks.begin(),
+                                vertexAndTracks.tracks.end());
+  }
+
   // Find vertices
   auto res = vertexFinder.find(inputTrackCollection, vFinderOptions);
 
@@ -89,16 +111,16 @@ FWE::VertexFindingAlgorithm::execute(const FW::AlgorithmContext& context) const
 
     unsigned int count = 0;
     for (const auto& vtx : vertexCollection) {
-      ACTS_INFO(++count << ". vertex at "
-                        << "("
-                        << vtx.position()[0]
-                        << ","
-                        << vtx.position()[1]
-                        << ","
-                        << vtx.position()[2]
-                        << ") with "
-                        << vtx.tracks().size()
-                        << " tracks.");
+      ACTS_INFO("\t" << ++count << ". vertex at "
+                     << "("
+                     << vtx.position()[0]
+                     << ","
+                     << vtx.position()[1]
+                     << ","
+                     << vtx.position()[2]
+                     << ") with "
+                     << vtx.tracks().size()
+                     << " tracks.");
     }
   } else {
     ACTS_ERROR("Error in vertex finder.");

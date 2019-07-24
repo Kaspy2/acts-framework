@@ -16,20 +16,13 @@
 #include "ACTFW/EventData/SimVertex.hpp"
 #include "ACTFW/Framework/ProcessCode.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "ACTFW/TruthTracking/VertexAndTracks.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Units.hpp"
 
 namespace FW {
-
-struct VertexAndTracks
-{
-  // The vertex
-  Data::SimVertex<> vertex;
-  // The tracks
-  std::vector<Acts::BoundParameters> tracks;
-};
 
 /// @brief Converter that takes a generator event
 /// (i.e. a std::vector<SimVertex>) and produces a

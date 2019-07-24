@@ -1,17 +1,17 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2016-2019 Acts project team
+// Copyright (C) 2019 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "VertexFitAlgorithm.hpp"
-
 #include <iostream>
 
 #include "ACTFW/Framework/RandomNumbers.hpp"
 #include "ACTFW/Framework/WhiteBoard.hpp"
+#include "ACTFW/TruthTracking/VertexAndTracks.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -40,9 +40,8 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
                                                      Acts::BoundParameters,
                                                      Propagator>;
 
-  const auto& inputTrackCollection
-      = context.eventStore.get<std::vector<Acts::BoundParameters>>(
-          m_cfg.trackCollection);
+  const auto& input = context.eventStore.get<std::vector<FW::VertexAndTracks>>(
+      m_cfg.trackCollection);
 
   // Set up constant B-Field
   Acts::ConstantBField bField(m_cfg.bField);
@@ -56,20 +55,28 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
   VertexFitter::Config vertexFitterCfg(bField, propagator);
   VertexFitter         vertexFitter(vertexFitterCfg);
 
-  Acts::Vertex<Acts::BoundParameters> fittedVertex;
-  if (!m_cfg.doConstrainedFit) {
-    // Vertex fitter options
-    Acts::VertexFitterOptions<Acts::BoundParameters> vfOptions(
-        context.geoContext, context.magFieldContext);
 
-    auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptions);
-    if (fitRes.ok()) {
-      fittedVertex = *fitRes;
+  for (auto& vertexAndTracks : input) {
+
+    auto& inputTrackCollection = vertexAndTracks.tracks;
+
+    Acts::Vertex<Acts::BoundParameters> fittedVertex;
+    if (!m_cfg.doConstrainedFit) {
+      if (inputTrackCollection.size() < 2) {
+        continue;
+      }
+      // Vertex fitter options
+      Acts::VertexFitterOptions<Acts::BoundParameters> vfOptions(
+      context.geoContext, context.magFieldContext);
+      
+      auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptions);
+      if (fitRes.ok()) {
+        fittedVertex = *fitRes;
+      } else {
+        ACTS_ERROR("Error in vertex fit.");
+      }
     } else {
-      ACTS_ERROR("Error in vertex fit.");
-    }
-  } else {
-    // Vertex constraint
+      // Vertex constraint
     Acts::Vertex<Acts::BoundParameters> theConstraint;
 
     theConstraint.setCovariance(m_cfg.constraintCov);
@@ -79,22 +86,31 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
     Acts::VertexFitterOptions<Acts::BoundParameters> vfOptionsConstr(
         context.geoContext, context.magFieldContext, theConstraint);
 
-    auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptionsConstr);
-    if (fitRes.ok()) {
-      fittedVertex = *fitRes;
-    } else {
-      ACTS_ERROR("Error in vertex fit.");
+      auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptionsConstr);
+      if (fitRes.ok()) {
+        fittedVertex = *fitRes;
+      } else {
+        ACTS_ERROR("Error in vertex fit.");
+      }
     }
-  }
 
-  ACTS_INFO("Fitted Vertex: "
-            << "("
-            << fittedVertex.position()[0]
-            << ","
-            << fittedVertex.position()[1]
-            << ","
-            << fittedVertex.position()[2]
-            << ")");
+    ACTS_INFO("Fitted Vertex: "
+              << "("
+              << fittedVertex.position()[0]
+              << ","
+              << fittedVertex.position()[1]
+              << ","
+              << fittedVertex.position()[2]
+              << ")");
+    ACTS_INFO("Truth Vertex: "
+              << "("
+              << vertexAndTracks.vertex.position[0]
+              << ","
+              << vertexAndTracks.vertex.position[1]
+              << ","
+              << vertexAndTracks.vertex.position[2]
+              << ")");
+  }
 
   return FW::ProcessCode::SUCCESS;
 }
