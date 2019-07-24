@@ -151,8 +151,7 @@ FW::TruthVerticesToTracksAlgorithm::execute(
   }  // end iteration over all vertices
 
   // VertexAndTracks objects to the EventStore
-  context.eventStore.add(m_cfg.outputCollection,
-                         std::move(vertexAndTracksCollection));
+  context.eventStore.add(m_cfg.output, std::move(vertexAndTracksCollection));
 
   return FW::ProcessCode::SUCCESS;
 }

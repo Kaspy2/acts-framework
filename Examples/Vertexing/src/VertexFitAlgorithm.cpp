@@ -55,7 +55,6 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
   VertexFitter::Config vertexFitterCfg(bField, propagator);
   VertexFitter         vertexFitter(vertexFitterCfg);
 
-
   for (auto& vertexAndTracks : input) {
 
     auto& inputTrackCollection = vertexAndTracks.tracks;
@@ -67,8 +66,8 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
       }
       // Vertex fitter options
       Acts::VertexFitterOptions<Acts::BoundParameters> vfOptions(
-      context.geoContext, context.magFieldContext);
-      
+          context.geoContext, context.magFieldContext);
+
       auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptions);
       if (fitRes.ok()) {
         fittedVertex = *fitRes;
@@ -77,14 +76,14 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
       }
     } else {
       // Vertex constraint
-    Acts::Vertex<Acts::BoundParameters> theConstraint;
+      Acts::Vertex<Acts::BoundParameters> theConstraint;
 
-    theConstraint.setCovariance(m_cfg.constraintCov);
-    theConstraint.setPosition(m_cfg.constraintPos);
+      theConstraint.setCovariance(m_cfg.constraintCov);
+      theConstraint.setPosition(m_cfg.constraintPos);
 
-    // Vertex fitter options
-    Acts::VertexFitterOptions<Acts::BoundParameters> vfOptionsConstr(
-        context.geoContext, context.magFieldContext, theConstraint);
+      // Vertex fitter options
+      Acts::VertexFitterOptions<Acts::BoundParameters> vfOptionsConstr(
+          context.geoContext, context.magFieldContext, theConstraint);
 
       auto fitRes = vertexFitter.fit(inputTrackCollection, vfOptionsConstr);
       if (fitRes.ok()) {

@@ -74,15 +74,15 @@ main(int argc, char* argv[])
 
   // Set up TruthVerticesToTracks converter algorithm
   TruthVerticesToTracksAlgorithm::Config trkConvConfig;
-  trkConvConfig.doSmearing       = true;
-  trkConvConfig.randomNumberSvc  = rnd;
-  trkConvConfig.bField           = bField;
-  trkConvConfig.inputCollection  = ptcSelectorCfg.output;
-  trkConvConfig.outputCollection = "all_tracks";
+  trkConvConfig.doSmearing      = true;
+  trkConvConfig.randomNumberSvc = rnd;
+  trkConvConfig.bField          = bField;
+  trkConvConfig.input           = ptcSelectorCfg.output;
+  trkConvConfig.output          = "all_tracks";
 
   // Set up track selector
   TrackSelector::Config selectorConfig;
-  selectorConfig.input       = trkConvConfig.outputCollection;
+  selectorConfig.input       = trkConvConfig.output;
   selectorConfig.output      = "selectedTracks";
   selectorConfig.absEtaMax   = 2.5;
   selectorConfig.rhoMax      = 4 * Acts::units::_mm;
