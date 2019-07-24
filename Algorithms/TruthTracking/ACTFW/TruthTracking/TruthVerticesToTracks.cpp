@@ -14,7 +14,6 @@
 #include "ACTFW/EventData/SimParticle.hpp"
 #include "ACTFW/EventData/SimVertex.hpp"
 #include "ACTFW/Framework/WhiteBoard.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
@@ -64,11 +63,19 @@ FW::TruthVerticesToTracksAlgorithm::execute(
   // Create random number generator and spawn gaussian distribution
   FW::RandomEngine rng = m_cfg.randomNumberSvc->spawnGenerator(context);
 
-  // Vector to store tracks extracted from event
-  std::vector<Acts::BoundParameters> trackCollection;
+  // Vector to store VertexAndTracks extracted from event
+  std::vector<VertexAndTracks> vertexAndTracksCollection;
 
   // Start looping over all vertices in current event
   for (auto& vtx : vertexCollection) {
+
+    // Create VertexAndTracks object
+    VertexAndTracks vertexAndTracks;
+    // Store current vertex
+    vertexAndTracks.vertex = vtx;
+
+    // Track objects at current vertex
+    std::vector<Acts::BoundParameters> trackCollection;
 
     // Iterate over all particle emerging from current vertex
     for (auto const& particle : vtx.out) {
@@ -134,12 +141,16 @@ FW::TruthVerticesToTracksAlgorithm::execute(
         trackCollection.push_back(Acts::BoundParameters(
             context.geoContext, nullptr, newTrackParams, perigeeSurface));
       }
-
     }  // end iteration over all particle at vertex
-  }    // end iteration over all vertices
 
-  // write the SpacePoints to the EventStore
-  context.eventStore.add(m_cfg.output, std::move(trackCollection));
+    // Store track objects in VertexAndTracks
+    vertexAndTracks.tracks = trackCollection;
+
+  }  // end iteration over all vertices
+
+  // VertexAndTracks objects to the EventStore
+  context.eventStore.add(m_cfg.outputCollection,
+                         std::move(vertexAndTracksCollection));
 
   return FW::ProcessCode::SUCCESS;
 }
