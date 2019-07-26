@@ -87,9 +87,12 @@ namespace Root {
   private:
     Config     m_cfg;         ///< The config class
     std::mutex m_writeMutex;  ///< Mutex used to protect multi-threaded writes
-    TFile*     m_outputFile{nullptr};          ///< The output file
-    int        m_eventNr{0};                   ///< The event number
-    ResPlotTool::ResPlotCache m_resPlotCache;  ///< The cache for residual plots
+    TFile*     m_outputFile{nullptr};  ///< The output file
+    int        m_eventNr{0};           ///< The event number
+    ResPlotTool::ResPlotCache
+        m_resPlotCache;  ///< The cache object for residual/pull plots
+    EffPlotTool::EffPlotCache
+                 m_effPlotCache;  ///< The cache object for efficiency plots
     ResPlotTool* m_resPlotTool{nullptr};  ///< The plot tool for residual&pull
     EffPlotTool* m_effPlotTool{nullptr};  ///< The plot tool for efficiency
   };

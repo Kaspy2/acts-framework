@@ -49,11 +49,13 @@ FW::Root::RootPerformanceValidation::RootPerformanceValidation(
   }
 
   m_resPlotTool->book(m_resPlotCache);
+  m_effPlotTool->book(m_effPlotCache);
 }
 
 FW::Root::RootPerformanceValidation::~RootPerformanceValidation()
 {
   m_resPlotTool->clear(m_resPlotCache);
+  m_effPlotTool->clear(m_effPlotCache);
   delete m_resPlotTool;
   delete m_effPlotTool;
   if (m_outputFile) {
@@ -70,7 +72,7 @@ FW::Root::RootPerformanceValidation::endRun()
   if (m_outputFile) {
     m_outputFile->cd();
     m_resPlotTool->write(m_resPlotCache);
-    m_effPlotTool->write();
+    m_effPlotTool->write(m_effPlotCache);
     ACTS_INFO("Write performance plots to '" << m_cfg.filePath << "'");
   }
   return ProcessCode::SUCCESS;
@@ -205,7 +207,7 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
     // fill the plots
     m_resPlotTool->fill(
         m_resPlotCache, ctx.geoContext, track.second, truthTrack);
-    m_effPlotTool->fill(track.second, truthParticle);
+    m_effPlotTool->fill(m_effPlotCache, track.second, truthParticle);
 
   }  // all tracks
 

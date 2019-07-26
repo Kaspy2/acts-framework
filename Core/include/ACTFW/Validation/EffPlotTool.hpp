@@ -45,6 +45,15 @@ public:
            {"Pt", PlotHelpers::Binning("pT [GeV/c]", 100, 0, 1000)}};
   };
 
+  /// @brief Nested Cache struct
+  struct EffPlotCache
+  {
+
+    TEfficiency* trackeff_vs_eta;  ///< Tracking efficiency vs eta
+    TEfficiency* trackeff_vs_phi;  ///< Tracking efficiency vs phi
+    TEfficiency* trackeff_vs_pT;   ///< Tracking efficiency vs pT
+  };
+
   /// Constructor
   ///
   /// @param cfg Configuration struct
@@ -52,25 +61,31 @@ public:
   EffPlotTool(const Config&        cfg,
               Acts::Logging::Level level = Acts::Logging::INFO);
 
-  /// Destructor
-  ~EffPlotTool();
+  /// @brief book the efficiency plots
+  /// @param effPlotCache the cache for efficiency plots
+  void
+  book(EffPlotCache& effPlotCache) const;
 
   /// @brief fill efficiency plots
+  /// @param effPlotCache cache object for efficiency plots
   /// @param track a vector of trackStates
   /// @param truthParticle a vector of truth hits
   void
-  fill(const TrackStateVector&  trackStates,
-       const Data::SimParticle& truthParticle);
+  fill(EffPlotCache&            effPlotCache,
+       const TrackStateVector&  trackStates,
+       const Data::SimParticle& truthParticle) const;
 
   /// @brief write the efficiency plots to file
+  /// @param effPlotCache cache object for efficiency plots
   void
-  write();
+  write(const EffPlotCache& effPlotCache) const;
+
+  /// @brief delete the efficiency plots
+  /// @param effPlotCache cache object for efficiency plots
+  void
+  clear(EffPlotCache& effPlotCache) const;
 
 private:
-  TEfficiency* m_trackeff_vs_eta;  ///< Tracking efficiency vs eta
-  TEfficiency* m_trackeff_vs_phi;  ///< Tracking efficiency vs phi
-  TEfficiency* m_trackeff_vs_pT;   ///< Tracking efficiency vs pT
-
   Config                              m_cfg;     ///< The Config class
   std::unique_ptr<const Acts::Logger> m_logger;  ///< The logging instance
 

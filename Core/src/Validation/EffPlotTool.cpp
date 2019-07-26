@@ -17,42 +17,49 @@ FW::EffPlotTool::EffPlotTool(const FW::EffPlotTool::Config& cfg,
                              Acts::Logging::Level           level)
   : m_cfg(cfg), m_logger(Acts::getDefaultLogger("EffPlotTool", level))
 {
-  PlotHelpers::Binning bPhi = m_cfg.varBinning["Phi"];
-  PlotHelpers::Binning bEta = m_cfg.varBinning["Eta"];
-  PlotHelpers::Binning bPt  = m_cfg.varBinning["Pt"];
+}
+
+void
+FW::EffPlotTool::book(EffPlotTool::EffPlotCache& effPlotCache) const
+{
+  PlotHelpers::Binning bPhi = m_cfg.varBinning.at("Phi");
+  PlotHelpers::Binning bEta = m_cfg.varBinning.at("Eta");
+  PlotHelpers::Binning bPt  = m_cfg.varBinning.at("Pt");
   ACTS_DEBUG("Initialize the histograms for efficiency plots");
   // efficiency vs pT
-  m_trackeff_vs_pT
+  effPlotCache.trackeff_vs_pT
       = PlotHelpers::bookEff("trackeff_vs_pT",
                              "Fraction of smoothed track;pT [GeV/c];Efficiency",
                              bPt);
   // efficiency vs eta
-  m_trackeff_vs_eta = PlotHelpers::bookEff(
+  effPlotCache.trackeff_vs_eta = PlotHelpers::bookEff(
       "trackeff_vs_eta", "Fraction of smoothed track;#eta;Efficiency", bEta);
   // efficiency vs phi
-  m_trackeff_vs_phi = PlotHelpers::bookEff(
+  effPlotCache.trackeff_vs_phi = PlotHelpers::bookEff(
       "trackeff_vs_phi", "Fraction of smoothed track;#phi;Efficiency", bPhi);
 }
 
-FW::EffPlotTool::~EffPlotTool()
+void
+FW::EffPlotTool::clear(EffPlotCache& effPlotCache) const
 {
-  delete m_trackeff_vs_pT;
-  delete m_trackeff_vs_eta;
-  delete m_trackeff_vs_phi;
+  delete effPlotCache.trackeff_vs_pT;
+  delete effPlotCache.trackeff_vs_eta;
+  delete effPlotCache.trackeff_vs_phi;
 }
 
 void
-FW::EffPlotTool::write()
+FW::EffPlotTool::write(const EffPlotTool::EffPlotCache& effPlotCache) const
 {
   ACTS_DEBUG("Write the plots to output file.");
-  m_trackeff_vs_pT->Write();
-  m_trackeff_vs_eta->Write();
-  m_trackeff_vs_phi->Write();
+  effPlotCache.trackeff_vs_pT->Write();
+  effPlotCache.trackeff_vs_eta->Write();
+  effPlotCache.trackeff_vs_phi->Write();
 }
 
 void
-FW::EffPlotTool::fill(const TrackStateVector&  trackStates,
-                      const Data::SimParticle& truthParticle)
+FW::EffPlotTool::fill(EffPlotTool::EffPlotCache& effPlotCache,
+                      const TrackStateVector&    trackStates,
+                      const Data::SimParticle&   truthParticle) const
 {
   int nSmoothed = 0;
   for (auto& state : trackStates) {
@@ -70,7 +77,7 @@ FW::EffPlotTool::fill(const TrackStateVector&  trackStates,
 
   bool status = nSmoothed > 0 ? true : false;
 
-  PlotHelpers::fillEff(m_trackeff_vs_pT, t_pT, status);
-  PlotHelpers::fillEff(m_trackeff_vs_eta, t_eta, status);
-  PlotHelpers::fillEff(m_trackeff_vs_phi, t_phi, status);
+  PlotHelpers::fillEff(effPlotCache.trackeff_vs_pT, t_pT, status);
+  PlotHelpers::fillEff(effPlotCache.trackeff_vs_eta, t_eta, status);
+  PlotHelpers::fillEff(effPlotCache.trackeff_vs_phi, t_phi, status);
 }
