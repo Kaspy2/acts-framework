@@ -47,10 +47,13 @@ FW::Root::RootPerformanceValidation::RootPerformanceValidation(
   } else if (m_effPlotTool == nullptr) {
     throw std::bad_alloc();
   }
+
+  m_resPlotTool->book(m_resPlotCache);
 }
 
 FW::Root::RootPerformanceValidation::~RootPerformanceValidation()
 {
+  m_resPlotTool->clear(m_resPlotCache);
   delete m_resPlotTool;
   delete m_effPlotTool;
   if (m_outputFile) {
@@ -62,11 +65,11 @@ FW::ProcessCode
 FW::Root::RootPerformanceValidation::endRun()
 {
   // fill residual and pull details into additional hists
-  m_resPlotTool->refinement();
+  m_resPlotTool->refinement(m_resPlotCache);
 
   if (m_outputFile) {
     m_outputFile->cd();
-    m_resPlotTool->write();
+    m_resPlotTool->write(m_resPlotCache);
     m_effPlotTool->write();
     ACTS_INFO("Write performance plots to '" << m_cfg.filePath << "'");
   }
@@ -78,6 +81,9 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
                                             const TrackMap&         tracks)
 {
   if (m_outputFile == nullptr) return ProcessCode::SUCCESS;
+
+  // Exclusive access to the tree while writing
+  std::lock_guard<std::mutex> lock(m_writeMutex);
 
   // Get the event number
   m_eventNr = ctx.eventNumber;
@@ -197,7 +203,8 @@ FW::Root::RootPerformanceValidation::writeT(const AlgorithmContext& ctx,
     }  // all states
 
     // fill the plots
-    m_resPlotTool->fill(ctx.geoContext, track.second, truthTrack);
+    m_resPlotTool->fill(
+        m_resPlotCache, ctx.geoContext, track.second, truthTrack);
     m_effPlotTool->fill(track.second, truthParticle);
 
   }  // all tracks

@@ -55,6 +55,53 @@ public:
            {"Pull", PlotHelpers::Binning("pull", 100, -5, 5)}};
   };
 
+  /// @brief Nested Cache struct
+  struct ResPlotCache
+  {
+
+    std::map<std::string, TH1F*> res;  ///< Residual distribution
+
+    std::map<std::string, TH2F*> res_vs_eta;  ///< Residual vs eta scatter plot
+    std::map<std::string, TH1F*>
+        resmean_vs_eta;  ///< Residual mean vs eta distribution
+    std::map<std::string, TH1F*>
+        reswidth_vs_eta;  ///< Residual width vs eta distribution
+
+    std::map<std::string, TH2F*>
+        res_vs_r;  ///< Residual vs global r scatter plot
+    std::map<std::string, TH1F*>
+        resmean_vs_r;  ///< Residual mean vs global r distribution
+    std::map<std::string, TH1F*>
+        reswidth_vs_r;  ///< Residual width vs global r distribution
+
+    std::map<std::string, TH2F*>
+        res_vs_z;  ///< Residual vs global z scatter plot
+    std::map<std::string, TH1F*>
+        resmean_vs_z;  ///< Residual mean vs global z distribution
+    std::map<std::string, TH1F*>
+        reswidth_vs_z;  ///< Residual width vs global z distribution
+
+    std::map<std::string, TH1F*> pull;  ///< Pull distribution
+
+    std::map<std::string, TH2F*> pull_vs_eta;  ///< Pull vs eta scatter plot
+    std::map<std::string, TH1F*>
+        pullmean_vs_eta;  ///< Pull mean vs eta distribution
+    std::map<std::string, TH1F*>
+        pullwidth_vs_eta;  ///< Pull width vs eta distribution
+
+    std::map<std::string, TH2F*> pull_vs_r;  ///< Pull vs global r scatter plot
+    std::map<std::string, TH1F*>
+        pullmean_vs_r;  ///< Pull mean vs global r distribution
+    std::map<std::string, TH1F*>
+        pullwidth_vs_r;  ///< Pull width vs global r distribution
+
+    std::map<std::string, TH2F*> pull_vs_z;  ///< Pull vs global z scatter plot
+    std::map<std::string, TH1F*>
+        pullmean_vs_z;  ///< Pull mean vs global z distribution
+    std::map<std::string, TH1F*>
+        pullwidth_vs_z;  ///< Pull width vs global z distribution
+  };
+
   /// Constructor
   ///
   /// @param cfg Configuration struct
@@ -62,71 +109,40 @@ public:
   ResPlotTool(const Config&        cfg,
               Acts::Logging::Level level = Acts::Logging::INFO);
 
-  /// Destructor
-  ~ResPlotTool();
+  /// @brief book the histograms
+  /// @param resPlotCache the cache for residual/pull histograms
+  void
+  book(ResPlotCache& resPlotCache) const;
 
   /// @brief fill the histograms
+  /// @param resPlotCache the cache for residual/pull histograms
   /// @param track a vector of trackState for the moment
   /// @param truth a vector of truthHit
   void
-  fill(const Acts::GeometryContext& gctx,
+  fill(ResPlotCache&                resPlotCache,
+       const Acts::GeometryContext& gctx,
        const TrackStateVector&      trackStates,
-       const SimParticleVector&     truthParticles);
+       const SimParticleVector&     truthParticles) const;
 
   /// @brief extract the details of the residual/pull plots and fill details
   /// into separate histograms
+  /// @param resPlotCache the cache object for residual/pull histograms
   void
-  refinement();
+  refinement(ResPlotCache& resPlotCache) const;
 
   /// @brief write the histograms to output file
+  /// @param resPlotCache the cache object for residual/pull histograms
   void
-  write();
+  write(const ResPlotCache& resPlotCache) const;
+
+  /// @brief delele the histograms
+  /// @param resPlotCache the cache object for residual/pull histograms
+  void
+  clear(ResPlotCache& resPlotCache) const;
 
 private:
   Config                              m_cfg;     ///< The config class
   std::unique_ptr<const Acts::Logger> m_logger;  ///< The logging instance
-
-  std::map<std::string, TH1F*> m_res;  ///< Residual distribution
-
-  std::map<std::string, TH2F*> m_res_vs_eta;  ///< Residual vs eta scatter plot
-  std::map<std::string, TH1F*>
-      m_resmean_vs_eta;  ///< Residual mean vs eta distribution
-  std::map<std::string, TH1F*>
-      m_reswidth_vs_eta;  ///< Residual width vs eta distribution
-
-  std::map<std::string, TH2F*>
-      m_res_vs_r;  ///< Residual vs global r scatter plot
-  std::map<std::string, TH1F*>
-      m_resmean_vs_r;  ///< Residual mean vs global r distribution
-  std::map<std::string, TH1F*>
-      m_reswidth_vs_r;  ///< Residual width vs global r distribution
-
-  std::map<std::string, TH2F*>
-      m_res_vs_z;  ///< Residual vs global z scatter plot
-  std::map<std::string, TH1F*>
-      m_resmean_vs_z;  ///< Residual mean vs global z distribution
-  std::map<std::string, TH1F*>
-      m_reswidth_vs_z;  ///< Residual width vs global z distribution
-
-  std::map<std::string, TH1F*> m_pull;  ///< Pull distribution
-
-  std::map<std::string, TH2F*> m_pull_vs_eta;  ///< Pull vs eta scatter plot
-  std::map<std::string, TH1F*>
-      m_pullmean_vs_eta;  ///< Pull mean vs eta distribution
-  std::map<std::string, TH1F*>
-      m_pullwidth_vs_eta;  ///< Pull width vs eta distribution
-
-  std::map<std::string, TH2F*> m_pull_vs_r;  ///< Pull vs global r scatter plot
-  std::map<std::string, TH1F*>
-      m_pullmean_vs_r;  ///< Pull mean vs global r distribution
-  std::map<std::string, TH1F*>
-      m_pullwidth_vs_r;  ///< Pull width vs global r distribution
-
-  std::map<std::string, TH2F*> m_pull_vs_z;  ///< Pull vs global z scatter plot
-  std::map<std::string, TH1F*>
-      m_pullmean_vs_z;  ///< Pull mean vs global z distribution
-  std::map<std::string, TH1F*>
-      m_pullwidth_vs_z;  ///< Pull width vs global z distribution
 
   /// The logger
   const Acts::Logger&

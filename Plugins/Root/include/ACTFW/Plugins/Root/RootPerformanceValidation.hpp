@@ -40,7 +40,12 @@ namespace Root {
   ///
   /// Write out the residual and pull of track parameters and efficiency, i.e.
   /// fraction of smoothed track
-  //  into output file
+  ///  into output file
+  ///
+  /// A common file can be provided for to the writer to attach his TTree,
+  /// this is done by setting the Config::rootFile pointer to an existing file
+  ///
+  /// Safe to use from multiple writer threads - uses a std::mutex lock.
   class RootPerformanceValidation final : public WriterT<TrackMap>
   {
   public:
@@ -80,9 +85,11 @@ namespace Root {
     writeT(const AlgorithmContext& ctx, const TrackMap& tracks) final override;
 
   private:
-    Config       m_cfg;                   ///< The config class
-    TFile*       m_outputFile{nullptr};   ///< The output file
-    int          m_eventNr{0};            ///< The event number
+    Config     m_cfg;         ///< The config class
+    std::mutex m_writeMutex;  ///< Mutex used to protect multi-threaded writes
+    TFile*     m_outputFile{nullptr};          ///< The output file
+    int        m_eventNr{0};                   ///< The event number
+    ResPlotTool::ResPlotCache m_resPlotCache;  ///< The cache for residual plots
     ResPlotTool* m_resPlotTool{nullptr};  ///< The plot tool for residual&pull
     EffPlotTool* m_effPlotTool{nullptr};  ///< The plot tool for efficiency
   };
