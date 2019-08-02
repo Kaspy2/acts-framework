@@ -87,7 +87,8 @@ main(int argc, char* argv[])
   if (vm["output-root"].template as<bool>()) {
     // Write the propagation steps as ROOT TTree
     FW::Root::RootMaterialTrackWriter::Config matTrackWriterRootConfig;
-    matTrackWriterRootConfig.collection = matCollection;
+    matTrackWriterRootConfig.prePostStep = true;
+    matTrackWriterRootConfig.collection  = matCollection;
     matTrackWriterRootConfig.filePath
         = FW::joinPaths(outputDir, matCollection + ".root");
     auto matTrackWriterRoot
