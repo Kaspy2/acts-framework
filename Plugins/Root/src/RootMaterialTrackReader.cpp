@@ -12,6 +12,8 @@
 #include "TChain.h"
 #include "TFile.h"
 
+#include "ACTFW/TruthTracking/VertexAndTracks.hpp"
+
 FW::Root::RootMaterialTrackReader::RootMaterialTrackReader(
     const FW::Root::RootMaterialTrackReader::Config& cfg)
   : FW::IReader(), m_cfg(cfg), m_events(0), m_inputChain(nullptr)

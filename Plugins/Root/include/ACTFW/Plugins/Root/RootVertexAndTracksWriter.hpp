@@ -86,7 +86,7 @@ namespace Root {
     std::vector<float> m_theta;
     std::vector<float> m_qp;
     std::vector<float> m_time;
-    std::vector<float> m_vtxID;
+    std::vector<int> m_vtxID;
 
     /// Pointers to the vectors
     std::vector<float>* m_ptrVx    = &m_vx;
@@ -98,7 +98,7 @@ namespace Root {
     std::vector<float>* m_ptrTheta = &m_theta;
     std::vector<float>* m_ptrQP    = &m_qp;
     std::vector<float>* m_ptrTime  = &m_time;
-    std::vector<float>* m_ptrVtxID = &m_vtxID;
+    std::vector<int>* m_ptrVtxID = &m_vtxID;
 
     /// @brief Clears all vectors
     void
