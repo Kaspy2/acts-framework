@@ -21,28 +21,39 @@
 
 using namespace FW;
 
-/// Main vertex finder example executable
+/// Main executable
 ///
 /// @param argc The argument count
 /// @param argv The argument list
 int
 main(int argc, char* argv[])
 {
+  using namespace boost::program_options;
   // setup and parse options
   auto desc = Options::makeDefaultOptions();
   Options::addSequencerOptions(desc);
   Options::addOutputOptions(desc);
+  desc.add_options()("input",
+                     value<std::string>()->default_value(""),
+                     "Input root file to read.");
   auto vm = Options::parse(desc, argc, argv);
+
   if (vm.empty()) {
     return EXIT_FAILURE;
   }
 
   auto logLevel = Options::readLogLevel(vm);
 
-  Root::RootVertexAndTracksReader::Config vtxAndTracksReaderCfg;
+  // Set file to read data from
+  std::string fileString = vm["input"].template as<std::string>();
 
-  std::string f = "/Users/bschlag/atlas/acts-framework/build/VertexAndTracksCollection_n20000_p10.root";
-  vtxAndTracksReaderCfg.fileList.push_back(f);
+  if (fileString.empty()) {
+    std::cout << "Error: Input file not set." << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  Root::RootVertexAndTracksReader::Config vtxAndTracksReaderCfg;
+  vtxAndTracksReaderCfg.fileList.push_back(fileString);
 
   // Set magnetic field
   Acts::Vector3D bField(0., 0., 2. * Acts::units::_T);
@@ -55,7 +66,8 @@ main(int argc, char* argv[])
   Sequencer::Config sequencerCfg = Options::readSequencerConfig(vm);
   Sequencer         sequencer(sequencerCfg);
 
-  sequencer.addReader(std::make_shared<Root::RootVertexAndTracksReader>(vtxAndTracksReaderCfg));
+  sequencer.addReader(
+      std::make_shared<Root::RootVertexAndTracksReader>(vtxAndTracksReaderCfg));
 
   sequencer.addAlgorithm(std::make_shared<FWE::VertexFindingAlgorithm>(
       vertexFindingCfg, logLevel));

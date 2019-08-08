@@ -56,6 +56,7 @@ FW::Root::RootVertexAndTracksWriter::RootVertexAndTracksWriter(
     m_outputTree->Branch("qp", &m_ptrQP);
     m_outputTree->Branch("time", &m_ptrTime);
     m_outputTree->Branch("vtxID", &m_ptrVtxID);
+    m_outputTree->Branch("trkCov", &m_ptrTrkCov);
   }
 }
 
@@ -92,6 +93,7 @@ FW::Root::RootVertexAndTracksWriter::ClearAll()
   m_qp.clear();
   m_time.clear();
   m_vtxID.clear();
+  m_trkCov.clear();
 }
 
 FW::ProcessCode
@@ -129,6 +131,19 @@ FW::Root::RootVertexAndTracksWriter::writeT(
       m_time.push_back(track.parameters()[Acts::ParDef::eT]);
       // Current vertex index as vertex ID
       m_vtxID.push_back(m_vx.size() - 1);
+
+      // Save track covariance
+      Acts::BoundSymMatrix cov = *track.covariance();
+      std::vector<double>  vec(36);
+      Eigen::Map<Acts::BoundSymMatrix>(vec.data(), cov.rows(), cov.cols())
+          = cov;
+
+      for (auto i : vec) {
+        std::cout << i << std::endl;
+      }
+      std::cout << std::endl;
+
+      m_trkCov.push_back(vec);
     }
   }
 

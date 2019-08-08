@@ -33,9 +33,9 @@ namespace Root {
     /// @brief The nested configuration struct
     struct Config
     {
-      std::string outputCollection = "vertexAndTracksCollection";
-      std::string treeName = "event";  ///< name of the output tree
-      std::vector<std::string> fileList;         ///< The name of the input file
+      std::string              outputCollection = "vertexAndTracksCollection";
+      std::string              treeName = "event";  ///< name of the output tree
+      std::vector<std::string> fileList;  ///< The name of the input file
 
       unsigned int batchSize = 1;  ///!< Batch
 
@@ -103,17 +103,18 @@ namespace Root {
 
     int m_eventNr = 0;
 
-    std::vector<float>* m_ptrVx    = new std::vector<float>;
-    std::vector<float>* m_ptrVy    = new std::vector<float>;
-    std::vector<float>* m_ptrVz    = new std::vector<float>;
-    std::vector<float>* m_ptrD0    = new std::vector<float>;
-    std::vector<float>* m_ptrZ0    = new std::vector<float>;
-    std::vector<float>* m_ptrPhi   = new std::vector<float>;
-    std::vector<float>* m_ptrTheta = new std::vector<float>;
-    std::vector<float>* m_ptrQP    = new std::vector<float>;
-    std::vector<float>* m_ptrTime  = new std::vector<float>;
-    std::vector<int>* m_ptrVtxID = new std::vector<int>;
-
+    std::vector<double>*              m_ptrVx    = new std::vector<double>;
+    std::vector<double>*              m_ptrVy    = new std::vector<double>;
+    std::vector<double>*              m_ptrVz    = new std::vector<double>;
+    std::vector<double>*              m_ptrD0    = new std::vector<double>;
+    std::vector<double>*              m_ptrZ0    = new std::vector<double>;
+    std::vector<double>*              m_ptrPhi   = new std::vector<double>;
+    std::vector<double>*              m_ptrTheta = new std::vector<double>;
+    std::vector<double>*              m_ptrQP    = new std::vector<double>;
+    std::vector<double>*              m_ptrTime  = new std::vector<double>;
+    std::vector<int>*                 m_ptrVtxID = new std::vector<int>;
+    std::vector<std::vector<double>>* m_ptrTrkCov
+        = new std::vector<std::vector<double>>;
   };
 
   inline std::string

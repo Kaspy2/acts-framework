@@ -75,30 +75,34 @@ namespace Root {
     int        m_eventNr{0};           ///< the event number of
 
     /// The vertex positions
-    std::vector<float> m_vx;
-    std::vector<float> m_vy;
-    std::vector<float> m_vz;
+    std::vector<double> m_vx;
+    std::vector<double> m_vy;
+    std::vector<double> m_vz;
 
     /// The track information
-    std::vector<float> m_d0;
-    std::vector<float> m_z0;
-    std::vector<float> m_phi;
-    std::vector<float> m_theta;
-    std::vector<float> m_qp;
-    std::vector<float> m_time;
-    std::vector<int> m_vtxID;
+    std::vector<double> m_d0;
+    std::vector<double> m_z0;
+    std::vector<double> m_phi;
+    std::vector<double> m_theta;
+    std::vector<double> m_qp;
+    std::vector<double> m_time;
+    std::vector<int>    m_vtxID;
+
+    std::vector<std::vector<double>> m_trkCov;
 
     /// Pointers to the vectors
-    std::vector<float>* m_ptrVx    = &m_vx;
-    std::vector<float>* m_ptrVy    = &m_vy;
-    std::vector<float>* m_ptrVz    = &m_vz;
-    std::vector<float>* m_ptrD0    = &m_d0;
-    std::vector<float>* m_ptrZ0    = &m_z0;
-    std::vector<float>* m_ptrPhi   = &m_phi;
-    std::vector<float>* m_ptrTheta = &m_theta;
-    std::vector<float>* m_ptrQP    = &m_qp;
-    std::vector<float>* m_ptrTime  = &m_time;
-    std::vector<int>* m_ptrVtxID = &m_vtxID;
+    std::vector<double>* m_ptrVx    = &m_vx;
+    std::vector<double>* m_ptrVy    = &m_vy;
+    std::vector<double>* m_ptrVz    = &m_vz;
+    std::vector<double>* m_ptrD0    = &m_d0;
+    std::vector<double>* m_ptrZ0    = &m_z0;
+    std::vector<double>* m_ptrPhi   = &m_phi;
+    std::vector<double>* m_ptrTheta = &m_theta;
+    std::vector<double>* m_ptrQP    = &m_qp;
+    std::vector<double>* m_ptrTime  = &m_time;
+    std::vector<int>*    m_ptrVtxID = &m_vtxID;
+
+    std::vector<std::vector<double>>* m_ptrTrkCov = &m_trkCov;
 
     /// @brief Clears all vectors
     void

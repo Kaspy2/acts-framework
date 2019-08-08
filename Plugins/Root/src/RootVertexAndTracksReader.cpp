@@ -9,10 +9,10 @@
 #include "ACTFW/Plugins/Root/RootVertexAndTracksReader.hpp"
 #include <iostream>
 #include "ACTFW/Framework/WhiteBoard.hpp"
-#include "TChain.h"
-#include "TFile.h"
 #include "ACTFW/TruthTracking/VertexAndTracks.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "TChain.h"
+#include "TFile.h"
 
 FW::Root::RootVertexAndTracksReader::RootVertexAndTracksReader(
     const FW::Root::RootVertexAndTracksReader::Config& cfg)
@@ -20,18 +20,19 @@ FW::Root::RootVertexAndTracksReader::RootVertexAndTracksReader(
 {
   m_inputChain = new TChain(m_cfg.treeName.c_str());
 
-    m_inputChain->SetBranchAddress("event_nr", &m_eventNr);
-    m_inputChain->SetBranchAddress("vx", &m_ptrVx);
-    m_inputChain->SetBranchAddress("vy", &m_ptrVy);
-    m_inputChain->SetBranchAddress("vz", &m_ptrVz);
+  m_inputChain->SetBranchAddress("event_nr", &m_eventNr);
+  m_inputChain->SetBranchAddress("vx", &m_ptrVx);
+  m_inputChain->SetBranchAddress("vy", &m_ptrVy);
+  m_inputChain->SetBranchAddress("vz", &m_ptrVz);
 
-    m_inputChain->SetBranchAddress("d0", &m_ptrD0);
-    m_inputChain->SetBranchAddress("z0", &m_ptrZ0);
-    m_inputChain->SetBranchAddress("phi", &m_ptrPhi);
-    m_inputChain->SetBranchAddress("theta", &m_ptrTheta);
-    m_inputChain->SetBranchAddress("qp", &m_ptrQP);
-    m_inputChain->SetBranchAddress("time", &m_ptrTime);
-    m_inputChain->SetBranchAddress("vtxID", &m_ptrVtxID);
+  m_inputChain->SetBranchAddress("d0", &m_ptrD0);
+  m_inputChain->SetBranchAddress("z0", &m_ptrZ0);
+  m_inputChain->SetBranchAddress("phi", &m_ptrPhi);
+  m_inputChain->SetBranchAddress("theta", &m_ptrTheta);
+  m_inputChain->SetBranchAddress("qp", &m_ptrQP);
+  m_inputChain->SetBranchAddress("time", &m_ptrTime);
+  m_inputChain->SetBranchAddress("vtxID", &m_ptrVtxID);
+  m_inputChain->SetBranchAddress("trkCov", &m_ptrTrkCov);
 
   // loop over the input files
   for (auto inputFile : m_cfg.fileList) {
@@ -57,6 +58,7 @@ FW::Root::RootVertexAndTracksReader::~RootVertexAndTracksReader()
   delete m_ptrQP;
   delete m_ptrTime;
   delete m_ptrVtxID;
+  delete m_ptrTrkCov;
 }
 
 FW::ProcessCode
@@ -64,11 +66,10 @@ FW::Root::RootVertexAndTracksReader::read(const FW::AlgorithmContext& context)
 {
 
   ACTS_DEBUG("Trying to read vertex and tracks.");
-  // read in the material track
+
   if (m_inputChain && context.eventNumber < m_events) {
-    // lock the mutex
+    // Lock the mutex
     std::lock_guard<std::mutex> lock(m_read_mutex);
-    // now read
 
     // The collection to be written
     std::vector<FW::VertexAndTracks> mCollection;
@@ -81,37 +82,45 @@ FW::Root::RootVertexAndTracksReader::read(const FW::AlgorithmContext& context)
                        + ib);
 
       // Loop over all vertices
-      for(int idx =0; idx<m_ptrVx->size(); ++idx){
+      for (int idx = 0; idx < m_ptrVx->size(); ++idx) {
         FW::VertexAndTracks vtxAndTracks;
-        vtxAndTracks.vertex.position = Acts::Vector3D((*m_ptrVx)[idx], (*m_ptrVy)[idx], (*m_ptrVz)[idx]);
+        vtxAndTracks.vertex.position
+            = Acts::Vector3D((*m_ptrVx)[idx], (*m_ptrVy)[idx], (*m_ptrVz)[idx]);
 
         std::vector<Acts::BoundParameters> tracks;
-        // Find all tracks belonging to this vertex
-        for(int trkId = 0; trkId<m_ptrD0->size(); ++trkId){
-          if((*m_ptrVtxID)[trkId] == idx){
-
+        // Loop over all tracks in current event
+        for (int trkId = 0; trkId < m_ptrD0->size(); ++trkId) {
+          // Take only tracks that belong to current vertex
+          if ((*m_ptrVtxID)[trkId] == idx) {
+            // Get track parameter
             Acts::TrackParametersBase::ParVector_t newTrackParams;
-            newTrackParams << (*m_ptrD0)[trkId], (*m_ptrZ0)[trkId], (*m_ptrPhi)[trkId],
-               (*m_ptrTheta)[trkId], (*m_ptrQP)[trkId], (*m_ptrTime)[trkId];
+            newTrackParams << (*m_ptrD0)[trkId], (*m_ptrZ0)[trkId],
+                (*m_ptrPhi)[trkId], (*m_ptrTheta)[trkId], (*m_ptrQP)[trkId],
+                (*m_ptrTime)[trkId];
 
-            // TODO: read perigee position and COV from file (and TODO: save these in writer)
+            // Get track covariance vector
+            std::vector<double> trkCovVec = (*m_ptrTrkCov)[trkId];
+
+            // Construct track covariance
+            std::unique_ptr<Acts::BoundSymMatrix> covMat
+                = std::make_unique<Acts::BoundSymMatrix>(
+                    Eigen::Map<Acts::BoundSymMatrix>(trkCovVec.data()));
+
+            // Create track parameters and add to track list
             std::shared_ptr<Acts::PerigeeSurface> perigeeSurface
-             = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3D(0.,0.,0.));
+                = Acts::Surface::makeShared<Acts::PerigeeSurface>(
+                    Acts::Vector3D(0., 0., 0.));
             tracks.push_back(Acts::BoundParameters(context.geoContext,
-                                                        nullptr,
-                                                        newTrackParams,
-                                                        perigeeSurface));
+                                                   std::move(covMat),
+                                                   newTrackParams,
+                                                   perigeeSurface));
           }
-        } // end loop over all tracks
+        }  // End loop over all tracks
+        // Set tracks
         vtxAndTracks.tracks = tracks;
-
+        // Add to collection
         mCollection.push_back(std::move(vtxAndTracks));
       }
-    }
-
-    std::cout << "Read in new event with " << mCollection.size() << " vertices." << std::endl;
-    for (auto vtxAndTrk : mCollection){
-      std::cout << "\t tracks: " << vtxAndTrk.tracks.size() << std::endl;
     }
 
     // Write to the collection to the EventStore
