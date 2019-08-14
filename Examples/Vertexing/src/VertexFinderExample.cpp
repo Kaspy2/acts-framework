@@ -17,8 +17,6 @@
 #include "ACTFW/Options/Pythia8Options.hpp"
 #include "ACTFW/Plugins/Csv/CsvParticleWriter.hpp"
 #include "ACTFW/Plugins/Root/RootParticleWriter.hpp"
-#include "ACTFW/Random/RandomNumbersOptions.hpp"
-#include "ACTFW/Random/RandomNumbersSvc.hpp"
 #include "ACTFW/Utilities/Paths.hpp"
 
 #include "ACTFW/Generators/ParticleSelector.hpp"
