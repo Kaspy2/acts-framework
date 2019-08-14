@@ -11,7 +11,7 @@
 
 #include "Acts/EventData/TrackParameters.hpp"
 
-#include "ACTFW/Barcode/BarcodeSvc.hpp"
+#include "ACTFW/EventData/Barcode.hpp"
 #include "ACTFW/Framework/Sequencer.hpp"
 #include "ACTFW/Options/CommonOptions.hpp"
 #include "ACTFW/Options/Pythia8Options.hpp"
@@ -50,10 +50,9 @@ main(int argc, char* argv[])
   auto logLevel = Options::readLogLevel(vm);
 
   // basic services
-  RandomNumbersSvc::Config rndCfg  = Options::readRandomNumbersConfig(vm);
-  auto                     rnd     = std::make_shared<RandomNumbersSvc>(rndCfg);
-  auto                     barcode = std::make_shared<BarcodeSvc>(
-      BarcodeSvc::Config(), Acts::getDefaultLogger("BarcodeSvc", logLevel));
+  auto rndCfg  = Options::readRandomNumbersConfig(vm);
+  auto rnd     = std::make_shared<RandomNumbers>(rndCfg);
+  auto barcode = std::make_shared<BarcodeSvc>(BarcodeSvc::Config());
 
   // Set up event generator producing one single hard collision
   EventGenerator::Config evgenCfg = Options::readPythia8Options(vm);

@@ -11,12 +11,12 @@
 #include <map>
 #include <memory>
 
-#include "ACTFW/Framework/BareAlgorithm.hpp"
-#include "ACTFW/Framework/RandomNumbers.hpp"
 #include "ACTFW/EventData/SimVertex.hpp"
+#include "ACTFW/Framework/BareAlgorithm.hpp"
 #include "ACTFW/Framework/ProcessCode.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "ACTFW/Framework/RandomNumbers.hpp"
 #include "ACTFW/TruthTracking/VertexAndTracks.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Logger.hpp"
