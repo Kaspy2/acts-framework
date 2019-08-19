@@ -86,7 +86,7 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
         moduleVolume.setSensitiveDetector(sens);
       }
 
-      xml_comp_t   x_mod_placement = x_module.child(_U(parameters));
+      xml_comp_t   x_mod_placement = x_module.child(_U(parameter));
       unsigned int nphi            = x_mod_placement.nphi();
       double       phi0            = x_mod_placement.phi0();
       double       phiTilt         = x_mod_placement.phi_tilt();

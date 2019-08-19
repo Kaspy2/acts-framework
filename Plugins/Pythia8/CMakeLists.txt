@@ -12,3 +12,6 @@ target_link_libraries(ActsFrameworkPythia8 PUBLIC
   ACTFramework
   Pythia8
   ${Boost_LIBRARIES})
+
+install(TARGETS ActsFrameworkPythia8 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY ACTFW DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

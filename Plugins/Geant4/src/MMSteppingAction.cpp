@@ -41,6 +41,7 @@ FW::Geant4::MMSteppingAction::~MMSteppingAction()
 void
 FW::Geant4::MMSteppingAction::UserSteppingAction(const G4Step* step)
 {
+
   // get the material
   G4Material* material = step->GetPreStepPoint()->GetMaterial();
 
@@ -67,17 +68,15 @@ FW::Geant4::MMSteppingAction::UserSteppingAction(const G4Step* step)
       if (A != 0.) A /= nElements;
       if (A != 0.) Z /= nElements;
     }
-
     // create the RecordedMaterialProperties
     const auto& prePos  = step->GetPreStepPoint()->GetPosition();
     const auto& postPos = step->GetPostStepPoint()->GetPosition();
 
     Acts::Vector3D presPos(prePos.x(), prePos.y(), prePos.z());
     Acts::Vector3D possPos(postPos.x(), postPos.y(), postPos.z());
-
     Acts::MaterialInteraction mInteraction;
     mInteraction.position       = 0.5 * (presPos + possPos);
-    mInteraction.direction      = (possPos - presPos).normalized();
+    mInteraction.direction      = (possPos != presPos) ? (possPos - presPos).normalized() : Acts::Vector3D::Zero();
     mInteraction.pathCorrection = step->GetStepLength();
     mInteraction.materialProperties
         = Acts::MaterialProperties(X0, L0, A, Z, rho, steplength);
