@@ -13,10 +13,17 @@
 #pragma once
 
 #include <memory>
+#include <map>
 #include "Acts/Propagator/MaterialInteractor.hpp"
 #include "G4UserEventAction.hh"
 #include "globals.hh"
 
+/// @namespace FW::Geant4:: Namespace for geant4 material mapping
+namespace FW {
+
+namespace Geant4 {
+
+	/// @brief Data container of a particle
 	struct ParticleRecord
 	{
 		std::array<double, 3> position, momentum;
@@ -24,13 +31,7 @@
 		double energy, mass;
 		int charge, trackid, parentid;
 	};
-
-
-/// @namespace FW::Geant4:: Namespace for geant4 material mapping
-namespace FW {
-
-namespace Geant4 {
-
+	
   class ORSteppingAction;
 
   /// @class OREventAction
@@ -77,7 +78,6 @@ namespace Geant4 {
     /// Instance of the EventAction
     static OREventAction* fgInstance;
 
-    /// The materialTrackWriter
 	std::map<int, std::vector<ParticleRecord>> m_particles;
 	std::vector<std::vector<ParticleRecord>> m_events;
   };  

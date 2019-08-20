@@ -44,11 +44,12 @@ FW::OutcomeRecording::OutcomeRecording(
   /// Now set up the Geant4 simulation
   m_runManager->SetUserInitialization(new FTFP_BERT);
   m_runManager->SetUserAction(new FW::Geant4::ORPrimaryGeneratorAction(
-      cnf.particleName, cnf.energy, cnf.lockAngle, cnf.phi, cnf.theta, cnf.pos, m_cfg.seed1, m_cfg.seed2));
+      cnf.particleName, cnf.energy, cnf.lockAngle, cnf.phi, cnf.theta, cnf.lockPosition, cnf.pos, m_cfg.seed1, m_cfg.seed2));
   FW::Geant4::MMRunAction* runaction = new FW::Geant4::MMRunAction();
   m_runManager->SetUserAction(runaction);
-  m_runManager->SetUserAction(new FW::Geant4::MMEventAction());
-  m_runManager->SetUserAction(new FW::Geant4::MMSteppingAction());
+  FW::Geant4::OREventAction* evtAct = new FW::Geant4::OREventAction();
+  m_runManager->SetUserAction(evtAct);
+  m_runManager->SetUserAction(new FW::Geant4::ORSteppingAction(evtAct));
   m_runManager->Initialize();
 }
 

@@ -6,10 +6,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ACTFW/Plugins/Geant4/MMEventAction.hpp"
+#include "ACTFW/Plugins/Geant4/OREventAction.hpp"
 #include <stdexcept>
-#include "ACTFW/Plugins/Geant4/MMPrimaryGeneratorAction.hpp"
-#include "ACTFW/Plugins/Geant4/MMSteppingAction.hpp"
+#include "ACTFW/Plugins/Geant4/ORPrimaryGeneratorAction.hpp"
+#include "ACTFW/Plugins/Geant4/ORSteppingAction.hpp"
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 
@@ -41,13 +41,16 @@ FW::Geant4::OREventAction::BeginOfEventAction(const G4Event*)
 {
   // reset the collection of material steps
   m_particles.clear();
-  MMSteppingAction::Instance()->Reset();
+  ORSteppingAction::Instance()->Reset();
 }
 
 void
-FW::Geant4::OREventAction::EndOfEventAction(const G4Event* event)
+FW::Geant4::OREventAction::EndOfEventAction(const G4Event*)
 {
-	m_events.push_back(m_particles);
+	std::vector<ParticleRecord> outgoingParticles;
+	for(std::map<int, std::vector<ParticleRecord>>::iterator it = m_particles.begin(); it != m_particles.end(); it++)
+		outgoingParticles.push_back(it->second.back());
+	m_events.push_back(outgoingParticles);
 }
 
 void
