@@ -18,6 +18,7 @@
 #include "ACTFW/Utilities/Paths.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "ACTFW/MaterialMapping/OutcomeRecordingOptions.hpp"
 
 #include "ACTFW/Plugins/Geant4/OREventAction.hpp"
 #include "ACTFW/Framework/WriterT.hpp"
@@ -98,6 +99,7 @@ main(int argc, char* argv[])
   FW::Options::addSequencerOptions(desc);
   FW::Options::addOutputOptions(desc);
   FW::Options::addDD4hepOptions(desc);
+  FW::Options::addOutcomeRecordingOptions(desc);
 
   // Parse the options
   auto vm = FW::Options::parse(desc, argc, argv);
@@ -139,19 +141,11 @@ main(int argc, char* argv[])
   // ---------------------------------------------------------------------------------
 
   // set up the algorithm writing out the material map
-  FW::OutcomeRecording::Config g4rConfig;
+  FW::OutcomeRecording::Config g4rConfig = FW::Options::readOutcomeRecordingConfig<po::variables_map>(vm);
   g4rConfig.geant4Service  = dd4hepToG4Svc;
-  g4rConfig.tracksPerEvent = nTracks;
   g4rConfig.seed1          = randomSeed1;
   g4rConfig.seed2          = randomSeed2;
   g4rConfig.particleCollection = "geant-outcome-tracks";
-  g4rConfig.particleName =  vm["ammo"].template as<std::string>();
-  g4rConfig.energy = 1000.;
-  g4rConfig.lockAngle = true;
-  g4rConfig.phi = 0.;
-  g4rConfig.theta = 0.5 * M_PI;
-  g4rConfig.lockPosition = true;
-  g4rConfig.pos = {0., 0., 0.};
   
   // create the geant4 algorithm
   auto g4rAlgorithm
