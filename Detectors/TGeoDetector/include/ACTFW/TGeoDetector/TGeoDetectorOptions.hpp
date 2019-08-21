@@ -174,5 +174,5 @@ namespace Options {
     }
     return detLayerConfigs;
   }
-}
-}
+}  // namespace Options
+}  // namespace FW

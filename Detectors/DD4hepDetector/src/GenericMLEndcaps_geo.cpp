@@ -53,8 +53,8 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     double layerLength  = x_layer.dz();
     double ringStaggerZ = x_layer.z_offset();
     // Create Volume and DetElement for Layer
-    string layerName = detName + _toString((int)layerNumber, "layer%d");
-    Volume layerVolume(layerName,
+    string     layerName = detName + _toString((int)layerNumber, "layer%d");
+    Volume     layerVolume(layerName,
                        Tube(layerRmin, layerRmax, layerLength),
                        lcdd.material(x_layer.materialStr()));
     DetElement lay_det(posEndcapDetector, layerName, layerNumber);

@@ -79,5 +79,5 @@ namespace Geant4 {
     G4ThreeVector m_direction;
   };
 
-}  // namespace G4
+}  // namespace Geant4
 }  // namespace FW

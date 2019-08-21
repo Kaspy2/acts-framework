@@ -53,9 +53,7 @@ FW::Root::RootTrackParameterWriter::RootTrackParameterWriter(
 
 FW::Root::RootTrackParameterWriter::~RootTrackParameterWriter()
 {
-  if (m_outputFile) {
-    m_outputFile->Close();
-  }
+  if (m_outputFile) { m_outputFile->Close(); }
 }
 
 FW::ProcessCode
@@ -65,8 +63,7 @@ FW::Root::RootTrackParameterWriter::endRun()
     m_outputFile->cd();
     m_outputTree->Write();
     ACTS_INFO("Wrote trackparameters to tree '" << m_cfg.treeName << "' in '"
-                                                << m_cfg.filePath
-                                                << "'");
+                                                << m_cfg.filePath << "'");
   }
   return ProcessCode::SUCCESS;
 }

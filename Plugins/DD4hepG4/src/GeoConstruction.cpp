@@ -33,5 +33,5 @@ namespace DD4hepG4 {
     g4map.volumeManager();
     return m_world;
   }
-}
-}
+}  // namespace DD4hepG4
+}  // namespace FW

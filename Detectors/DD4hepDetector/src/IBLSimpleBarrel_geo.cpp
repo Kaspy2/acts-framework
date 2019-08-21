@@ -44,8 +44,8 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     double     l_rmin  = x_layer.inner_r();
     double     l_rmax  = x_layer.outer_r();
     // Create Volume for Layer
-    string layer_name = det_name + _toString((int)layer_num, "layer%d");
-    Volume layer_vol(layer_name,
+    string     layer_name = det_name + _toString((int)layer_num, "layer%d");
+    Volume     layer_vol(layer_name,
                      Tube(l_rmin, l_rmax, x_layer.z()),
                      lcdd.material(x_layer.materialStr()));
     DetElement lay_det(cylinderVolume, layer_name, layer_num);
@@ -110,7 +110,7 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
                              x_trd.length(),
                              x_trd.length(),
                              x_trd.thickness());
-        Tube tubs_shape(x_tubs.rmin(), x_tubs.rmax(), x_tubs.dz());
+        Tube      tubs_shape(x_tubs.rmin(), x_tubs.rmax(), x_tubs.dz());
         // create the substraction
         Volume sub_vol("subtraction_components",
                        SubtractionSolid(trap_shape,
@@ -155,9 +155,7 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
           // create detector element
           DetElement mod_det(lay_det, module_name, module_num);
           // Set Sensitive Volumes sensitive
-          if (x_module.isSensitive()) {
-            mod_vol.setSensitiveDetector(sens);
-          }
+          if (x_module.isSensitive()) { mod_vol.setSensitiveDetector(sens); }
           int comp_num = 0;
           for (auto& sensComp : sensComponents) {
             DetElement component_det(mod_det, "component", comp_num);

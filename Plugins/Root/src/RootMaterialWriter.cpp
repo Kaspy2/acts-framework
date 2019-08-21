@@ -51,7 +51,7 @@ FW::Root::RootMaterialWriter::write(
   m_outputFile->cd();
 
   auto& surfaceMaps = detMaterial.first;
-  for (auto & [ key, value ] : surfaceMaps) {
+  for (auto& [key, value] : surfaceMaps) {
 
     // Get the Surface material
     const Acts::ISurfaceMaterial* sMaterial = value.get();
@@ -142,7 +142,7 @@ FW::Root::RootMaterialWriter::write(
       max->Write();
     }
 
-    TH2F* t = new TH2F(m_cfg.ttag.c_str(),
+    TH2F* t   = new TH2F(m_cfg.ttag.c_str(),
                        "thickness [mm] ;b0 ;b1",
                        bins0,
                        -0.5,
@@ -150,7 +150,7 @@ FW::Root::RootMaterialWriter::write(
                        bins1,
                        -0.5,
                        bins1 - 0.5);
-    TH2F* x0 = new TH2F(m_cfg.x0tag.c_str(),
+    TH2F* x0  = new TH2F(m_cfg.x0tag.c_str(),
                         "X_{0} [mm] ;b0 ;b1",
                         bins0,
                         -0.5,
@@ -158,7 +158,7 @@ FW::Root::RootMaterialWriter::write(
                         bins1,
                         -0.5,
                         bins1 - 0.5);
-    TH2F* l0 = new TH2F(m_cfg.l0tag.c_str(),
+    TH2F* l0  = new TH2F(m_cfg.l0tag.c_str(),
                         "#Lambda_{0} [mm] ;b0 ;b1",
                         bins0,
                         -0.5,
@@ -166,7 +166,7 @@ FW::Root::RootMaterialWriter::write(
                         bins1,
                         -0.5,
                         bins1 - 0.5);
-    TH2F* A = new TH2F(m_cfg.atag.c_str(),
+    TH2F* A   = new TH2F(m_cfg.atag.c_str(),
                        "X_{0} [mm] ;b0 ;b1",
                        bins0,
                        -0.5,
@@ -174,7 +174,7 @@ FW::Root::RootMaterialWriter::write(
                        bins1,
                        -0.5,
                        bins1 - 0.5);
-    TH2F* Z = new TH2F(m_cfg.ztag.c_str(),
+    TH2F* Z   = new TH2F(m_cfg.ztag.c_str(),
                        "#Lambda_{0} [mm] ;b0 ;b1",
                        bins0,
                        -0.5,
@@ -221,9 +221,7 @@ FW::Root::RootMaterialWriter::write(const Acts::TrackingGeometry& tGeometry)
   // Create a detector material map and loop recursively through it
   Acts::DetectorMaterialMaps detMatMap;
   auto                       hVolume = tGeometry.highestTrackingVolume();
-  if (hVolume != nullptr) {
-    collectMaterial(*hVolume, detMatMap);
-  }
+  if (hVolume != nullptr) { collectMaterial(*hVolume, detMatMap); }
   // Write the resulting map to the file
   write(detMatMap);
 }

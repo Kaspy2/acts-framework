@@ -152,9 +152,7 @@ materialValidationExample(int              argc,
   // Add specific options for this geometry
   optionsSetup(desc);
   auto vm = FW::Options::parse(desc, argc, argv);
-  if (vm.empty()) {
-    return EXIT_FAILURE;
-  }
+  if (vm.empty()) { return EXIT_FAILURE; }
 
   FW::Sequencer sequencer(FW::Options::readSequencerConfig(vm));
 

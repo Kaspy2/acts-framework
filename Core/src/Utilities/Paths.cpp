@@ -45,8 +45,6 @@ FW::splitByDelimiter(const std::string& files, char delim)
 
   std::stringstream ss(files);
   std::string       token;
-  while (getline(ss, token, delim)) {
-    fileList.push_back(token);
-  }
+  while (getline(ss, token, delim)) { fileList.push_back(token); }
   return fileList;
 }

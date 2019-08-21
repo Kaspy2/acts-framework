@@ -21,16 +21,16 @@
 
 namespace po = boost::program_options;
 
-using InterpolatedMapper2D = Acts::
-    InterpolatedBFieldMapper<Acts::detail::Grid<Acts::Vector2D,
-                                                Acts::detail::EquidistantAxis,
-                                                Acts::detail::EquidistantAxis>>;
+using InterpolatedMapper2D = Acts::InterpolatedBFieldMapper<
+    Acts::detail::Grid<Acts::Vector2D,
+                       Acts::detail::EquidistantAxis,
+                       Acts::detail::EquidistantAxis>>;
 
-using InterpolatedMapper3D = Acts::
-    InterpolatedBFieldMapper<Acts::detail::Grid<Acts::Vector3D,
-                                                Acts::detail::EquidistantAxis,
-                                                Acts::detail::EquidistantAxis,
-                                                Acts::detail::EquidistantAxis>>;
+using InterpolatedMapper3D = Acts::InterpolatedBFieldMapper<
+    Acts::detail::Grid<Acts::Vector3D,
+                       Acts::detail::EquidistantAxis,
+                       Acts::detail::EquidistantAxis,
+                       Acts::detail::EquidistantAxis>>;
 
 using InterpolatedBFieldMap2D
     = Acts::InterpolatedBFieldMap<InterpolatedMapper2D>;
@@ -189,8 +189,7 @@ namespace Options {
         auto mapper3D = FW::BField::root::fieldMapperXYZ(
             [](std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ) {
               return (binsXYZ.at(0) * (nBinsXYZ.at(1) * nBinsXYZ.at(2))
-                      + binsXYZ.at(1) * nBinsXYZ.at(2)
-                      + binsXYZ.at(2));
+                      + binsXYZ.at(1) * nBinsXYZ.at(2) + binsXYZ.at(2));
             },
             vm["bf-map"].template as<std::string>(),
             vm["bf-name"].template as<std::string>(),
@@ -226,8 +225,7 @@ namespace Options {
         auto mapper3D = FW::BField::txt::fieldMapperXYZ(
             [](std::array<size_t, 3> binsXYZ, std::array<size_t, 3> nBinsXYZ) {
               return (binsXYZ.at(0) * (nBinsXYZ.at(1) * nBinsXYZ.at(2))
-                      + binsXYZ.at(1) * nBinsXYZ.at(2)
-                      + binsXYZ.at(2));
+                      + binsXYZ.at(1) * nBinsXYZ.at(2) + binsXYZ.at(2));
             },
             vm["bf-map"].template as<std::string>(),
             lengthUnit,
@@ -275,5 +273,5 @@ namespace Options {
         std::move(mapConst),
         std::move(mapScale));
   }
-}
-}
+}  // namespace Options
+}  // namespace FW

@@ -9,10 +9,10 @@
 #include "Acts/Plugins/DD4hep/ActsExtension.hpp"
 #include "DD4hep/DetFactoryHelper.h"
 
-using dd4hep::Volume;
+using dd4hep::DetElement;
 using dd4hep::PlacedVolume;
 using dd4hep::Tube;
-using dd4hep::DetElement;
+using dd4hep::Volume;
 
 static dd4hep::Ref_t
 create_element(dd4hep::Detector& lcdd, xml_h e, dd4hep::SensitiveDetector)

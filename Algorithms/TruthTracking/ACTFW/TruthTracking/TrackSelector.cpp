@@ -55,15 +55,11 @@ FW::TrackSelector::execute(const FW::AlgorithmContext& ctx) const
 
   for (const auto& track : input) {
 
-    if (isValidTrack(track)) {
-      selected.push_back(track);
-    }
+    if (isValidTrack(track)) { selected.push_back(track); }
   }
 
   ACTS_DEBUG("event " << ctx.eventNumber << " selected " << selected.size()
-                      << " from "
-                      << input.size()
-                      << " tracks");
+                      << " from " << input.size() << " tracks");
 
   // write selected tracks
   ctx.eventStore.add(m_cfg.output, std::move(selected));

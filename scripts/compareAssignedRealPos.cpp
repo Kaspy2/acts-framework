@@ -53,7 +53,7 @@ compareAssignedRealPos(std::string inFile,
     TH2F*       r_z_assigned = (TH2F*)dir->Get("r_z_assigned");
     TH2F*       x_y          = (TH2F*)dir->Get("x_y");
     TH2F*       x_y_assigned = (TH2F*)dir->Get("x_y_assigned");
-    if (entry == 17) entry   = 20;
+    if (entry == 17) entry = 20;
     if (entry == 10 || entry == 50) entry++;
     if (r_z && r_z_assigned) {
       canvas1->cd();

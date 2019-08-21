@@ -66,9 +66,7 @@ fatrasExample(int               argc,
   // Add specific options for this geometry
   optionsSetup(desc);
   auto vm = FW::Options::parse(desc, argc, argv);
-  if (vm.empty()) {
-    return EXIT_FAILURE;
-  }
+  if (vm.empty()) { return EXIT_FAILURE; }
 
   FW::Sequencer sequencer(FW::Options::readSequencerConfig(vm));
 
@@ -86,9 +84,7 @@ fatrasExample(int               argc,
   auto tGeometry         = geometry.first;
   auto contextDecorators = geometry.second;
   // Add the decorator to the sequencer
-  for (auto cdr : contextDecorators) {
-    sequencer.addContextDecorator(cdr);
-  }
+  for (auto cdr : contextDecorators) { sequencer.addContextDecorator(cdr); }
 
   // (A) EVGEN
   // Setup the evgen input to the simulation

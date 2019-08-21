@@ -12,11 +12,11 @@
 #include "Acts/Plugins/DD4hep/ActsExtension.hpp"
 #include "Acts/Plugins/DD4hep/IActsExtension.hpp"
 
-using dd4hep::Volume;
 using dd4hep::DetElement;
-using dd4hep::xml::Dimension;
-using dd4hep::xml::Component;
 using dd4hep::PlacedVolume;
+using dd4hep::Volume;
+using dd4hep::xml::Component;
+using dd4hep::xml::Dimension;
 
 namespace det {
 static dd4hep::Ref_t
@@ -183,7 +183,7 @@ createTkLayoutTrackerEndcap(dd4hep::Detector&         lcdd,
             dd4hep::Transform3D   myTrafo(lRotation4 * lRotation3 * lRotation2
                                             * lRotation1,
                                         lTranslation);
-            PlacedVolume placedComponentVolume
+            PlacedVolume          placedComponentVolume
                 = discVolumeVec.back().placeVolume(componentVolume,
                                                    lRotation_PhiPos * myTrafo);
             if (xComp.isSensitive()) {

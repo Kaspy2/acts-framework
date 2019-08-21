@@ -71,9 +71,7 @@ accessStepWise(field_t&         bField,
           // access the field with the cell
           auto field_from_cache = bField.getField(position, bCache);
           // check
-          if (!field_direct.isApprox(field_from_cache)) {
-            ++mismatched;
-          }
+          if (!field_direct.isApprox(field_from_cache)) { ++mismatched; }
           // increase the step
           currentStep += access_step;
           // show the progress bar
@@ -113,9 +111,7 @@ accessRandom(field_t&         bField,
     // access the field with the cell
     auto field_from_cache = bField.getField(position, bCache);
     // check
-    if (!field_direct.isApprox(field_from_cache)) {
-      ++mismatched;
-    }
+    if (!field_direct.isApprox(field_from_cache)) { ++mismatched; }
     // show the progress bar
     ++show_progress;
   }
@@ -153,9 +149,7 @@ main(int argc, char* argv[])
       po::value<double>()->default_value(100.),
       "track length in [mm] magnetic field access.");
   auto vm = FW::Options::parse(desc, argc, argv);
-  if (vm.empty()) {
-    return EXIT_FAILURE;
-  }
+  if (vm.empty()) { return EXIT_FAILURE; }
 
   // A test magnetic field context
   Acts::MagneticFieldContext magFieldContext = Acts::MagneticFieldContext();

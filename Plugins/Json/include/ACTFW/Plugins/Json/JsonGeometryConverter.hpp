@@ -30,7 +30,7 @@ using VolumeMaterialMap
     = std::map<GeometryID, std::shared_ptr<const IVolumeMaterial>>;
 
 using DetectorMaterialMaps = std::pair<SurfaceMaterialMap, VolumeMaterialMap>;
-}
+}  // namespace Acts
 
 namespace FW {
 
@@ -69,8 +69,8 @@ namespace Json {
     std::string volumeName;
 
     std::map<geo_id_value, LayerRep> layers;
-    SurfaceMaterialRep           boundaries;
-    const Acts::IVolumeMaterial* material = nullptr;
+    SurfaceMaterialRep               boundaries;
+    const Acts::IVolumeMaterial*     material = nullptr;
 
     /// The VolumeRep is actually worth it to write out
     operator bool() const

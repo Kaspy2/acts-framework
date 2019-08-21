@@ -88,12 +88,8 @@ FWE::VertexFitAlgorithm::execute(const FW::AlgorithmContext& context) const
   }
 
   ACTS_INFO("Fitted Vertex: "
-            << "("
-            << fittedVertex.position()[0]
-            << ","
-            << fittedVertex.position()[1]
-            << ","
-            << fittedVertex.position()[2]
+            << "(" << fittedVertex.position()[0] << ","
+            << fittedVertex.position()[1] << "," << fittedVertex.position()[2]
             << ")");
 
   return FW::ProcessCode::SUCCESS;

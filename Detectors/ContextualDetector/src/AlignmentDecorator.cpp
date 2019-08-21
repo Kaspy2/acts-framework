@@ -37,8 +37,8 @@ FW::Contextual::AlignmentDecorator::decorate(AlgorithmContext& context)
       auto cios = m_iovStatus.size();
       ACTS_VERBOSE("New IOV detected at event " << context.eventNumber
                                                 << ", emulate new alignment.");
-      ACTS_VERBOSE(
-          "New IOV identifier set to " << iov << ", curently valid: " << cios);
+      ACTS_VERBOSE("New IOV identifier set to "
+                   << iov << ", curently valid: " << cios);
 
       for (unsigned int ic = cios; ic <= iov; ++ic) {
         m_iovStatus.push_back(false);

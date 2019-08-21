@@ -33,9 +33,7 @@ main(int argc, char* argv[])
   // parse options from command line flags
   auto vm = FW::Options::parse(opt, argc, argv);
   // an empty varaibles map indicates an error
-  if (vm.empty()) {
-    return EXIT_FAILURE;
-  }
+  if (vm.empty()) { return EXIT_FAILURE; }
 
   // extract some common options
   auto logLevel = FW::Options::readLogLevel(vm);

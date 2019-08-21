@@ -320,6 +320,6 @@ namespace Root {
     }
   };
 
-}  // namespace BField
+}  // namespace Root
 
 }  // namespace FW

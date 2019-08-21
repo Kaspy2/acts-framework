@@ -16,9 +16,7 @@
 
 #include "ACTFW/Framework/RandomNumbers.hpp"
 
-FW::RandomNumbers::RandomNumbers(const Config& cfg) : m_cfg(cfg)
-{
-}
+FW::RandomNumbers::RandomNumbers(const Config& cfg) : m_cfg(cfg) {}
 
 FW::RandomEngine
 FW::RandomNumbers::spawnGenerator(const AlgorithmContext& context) const

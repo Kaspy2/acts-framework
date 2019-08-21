@@ -487,7 +487,7 @@ private:
                const std::string& branchName,
                const std::string  elemType)
   {
-// clang-format off
+    // clang-format off
 
     // We support vectors of different types by switching across type (strings)
     #define CREATE_VECTOR__HANDLE_TYPE(type_name)  \
@@ -538,9 +538,7 @@ private:
   toString(const std::vector<U>& vector)
   {
     std::ostringstream oss{"{ "};
-    for (const auto& data : vector) {
-      oss << data << "  \t";
-    }
+    for (const auto& data : vector) { oss << data << "  \t"; }
     oss << " }";
     return oss.str();
   }

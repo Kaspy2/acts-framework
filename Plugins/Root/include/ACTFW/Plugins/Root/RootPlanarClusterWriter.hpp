@@ -31,7 +31,7 @@ namespace Root {
   ///
   /// Safe to use from multiple writer threads - uses a std::mutex lock.
   class RootPlanarClusterWriter
-      : public WriterT<DetectorData<geo_id_value, Acts::PlanarModuleCluster>>
+    : public WriterT<DetectorData<geo_id_value, Acts::PlanarModuleCluster>>
   {
   public:
     using Base = WriterT<DetectorData<geo_id_value, Acts::PlanarModuleCluster>>;

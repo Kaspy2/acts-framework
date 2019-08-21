@@ -71,9 +71,7 @@ FW::Root::RootParticleWriter::RootParticleWriter(
 
 FW::Root::RootParticleWriter::~RootParticleWriter()
 {
-  if (m_outputFile) {
-    m_outputFile->Close();
-  }
+  if (m_outputFile) { m_outputFile->Close(); }
 }
 
 FW::ProcessCode
@@ -83,8 +81,7 @@ FW::Root::RootParticleWriter::endRun()
     m_outputFile->cd();
     m_outputTree->Write();
     ACTS_INFO("Wrote particles to tree '" << m_cfg.treeName << "' in '"
-                                          << m_cfg.filePath
-                                          << "'");
+                                          << m_cfg.filePath << "'");
   }
   return ProcessCode::SUCCESS;
 }

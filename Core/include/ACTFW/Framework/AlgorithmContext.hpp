@@ -36,7 +36,8 @@ struct AlgorithmContext
   }
 
   /// @brief ++operator overload to increase the algorithm number
-  AlgorithmContext& operator++()
+  AlgorithmContext&
+  operator++()
   {
     algorithmNumber += 1;
     return (*this);

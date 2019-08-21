@@ -33,8 +33,8 @@ namespace Root {
   ///
   /// Safe to use from multiple writer threads - uses a std::mutex lock.
   class RootSimHitWriter
-      : public WriterT<DetectorData<geo_id_value,
-                                    Data::SimHit<Data::SimParticle>>>
+    : public WriterT<
+          DetectorData<geo_id_value, Data::SimHit<Data::SimParticle>>>
   {
   public:
     using Base

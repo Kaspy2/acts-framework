@@ -74,9 +74,7 @@ FW::Root::RootPlanarClusterWriter::RootPlanarClusterWriter(
 FW::Root::RootPlanarClusterWriter::~RootPlanarClusterWriter()
 {
   /// Close the file if it's yours
-  if (m_cfg.rootFile == nullptr) {
-    m_outputFile->Close();
-  }
+  if (m_cfg.rootFile == nullptr) { m_outputFile->Close(); }
 }
 
 FW::ProcessCode
@@ -86,14 +84,13 @@ FW::Root::RootPlanarClusterWriter::endRun()
   m_outputFile->cd();
   m_outputTree->Write();
   ACTS_INFO("Wrote particles to tree '" << m_cfg.treeName << "' in '"
-                                        << m_cfg.filePath
-                                        << "'");
+                                        << m_cfg.filePath << "'");
   return ProcessCode::SUCCESS;
 }
 
 FW::ProcessCode
 FW::Root::RootPlanarClusterWriter::writeT(
-    const AlgorithmContext& context,
+    const AlgorithmContext&                                          context,
     const FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster>& clusters)
 {
   // Exclusive access to the tree while writing

@@ -47,8 +47,8 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     double     layerRmax   = x_layer.outer_r();
     double     layerLength = x_layer.z();
     // Create Volume and DetElement for Layer
-    string layerName = detName + _toString((int)layerNumber, "layer%d");
-    Volume layerVolume(layerName,
+    string     layerName = detName + _toString((int)layerNumber, "layer%d");
+    Volume     layerVolume(layerName,
                        Tube(layerRmin, layerRmax, layerLength),
                        lcdd.material(x_layer.materialStr()));
     DetElement layerDetector(barrelDetector, layerName, layerNumber);

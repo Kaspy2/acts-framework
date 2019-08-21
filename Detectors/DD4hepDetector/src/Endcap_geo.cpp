@@ -48,8 +48,8 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     double     l_rmax   = x_layer.outer_r();
     double     l_length = x_layer.dz();
     // Create Volume and DetElement for Layer
-    string layer_name = det_name + _toString((int)layer_num, "layer%d");
-    Volume layer_vol(layer_name,
+    string     layer_name = det_name + _toString((int)layer_num, "layer%d");
+    Volume     layer_vol(layer_name,
                      Tube(l_rmin, l_rmax, l_length),
                      lcdd.material(x_layer.materialStr()));
     DetElement lay_det(cylinderVolume, layer_name, layer_num);
@@ -132,10 +132,10 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
         for (int k = 0; k < repeat; k++) {
           string zname = _toString((int)k, "z%d");
 
-          double phi = deltaphi / dd4hep::rad * k;
-          string module_name
-              = zname + _toString((int)(repeat * module_num_num + module_num),
-                                  "module%d");
+          double phi         = deltaphi / dd4hep::rad * k;
+          string module_name = zname
+              + _toString((int)(repeat * module_num_num + module_num),
+                          "module%d");
           Position trans(radius * cos(phi), radius * sin(phi), slicedz);
           // Create the module DetElement
           DetElement mod_det(
@@ -164,7 +164,7 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
           }
           Rotation3D rotation1(1., 0., 0., 0., 1., 0., 0., 0., 1.);
           // Place Module Box Volumes in layer
-          Transform3D transf1(RotationX(0.5 * M_PI)
+          Transform3D  transf1(RotationX(0.5 * M_PI)
                                   * RotationY(phi + 0.5 * M_PI)
                                   * RotationZ(0.1 * M_PI),
                               trans);

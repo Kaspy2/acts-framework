@@ -80,9 +80,7 @@ FW::TruthVerticesToTracksAlgorithm::execute(
           std::nullopt, particle.position(), ptclMom, particle.q(), 0.);
       // Run propagator
       auto result = propagator.propagate(start, *perigeeSurface, pOptions);
-      if (!result.ok()) {
-        continue;
-      }
+      if (!result.ok()) { continue; }
 
       // get perigee parameters
       const auto& perigeeParameters = (*result).endParameters->parameters();
@@ -148,12 +146,8 @@ FW::TruthVerticesToTracksAlgorithm::correctPhiThetaPeriodicity(
     double& thetaIn) const
 {
   double tmpPhi = std::fmod(phiIn, 2 * M_PI);  // temp phi
-  if (tmpPhi > M_PI) {
-    tmpPhi -= 2 * M_PI;
-  }
-  if (tmpPhi < -M_PI && tmpPhi > -2 * M_PI) {
-    tmpPhi += 2 * M_PI;
-  }
+  if (tmpPhi > M_PI) { tmpPhi -= 2 * M_PI; }
+  if (tmpPhi < -M_PI && tmpPhi > -2 * M_PI) { tmpPhi += 2 * M_PI; }
 
   double tmpTht = std::fmod(thetaIn, 2 * M_PI);  // temp theta
   if (tmpTht < -M_PI) {

@@ -25,9 +25,7 @@ FW::Json::JsonMaterialWriter::JsonMaterialWriter(
   }
 }
 
-FW::Json::JsonMaterialWriter::~JsonMaterialWriter()
-{
-}
+FW::Json::JsonMaterialWriter::~JsonMaterialWriter() {}
 
 void
 FW::Json::JsonMaterialWriter::write(

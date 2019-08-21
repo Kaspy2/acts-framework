@@ -41,10 +41,10 @@ namespace Data {
   template <typename identifier_t, typename data_t>
   void
   insert(DetectorData<identifier_t, data_t>& dData,
-         identifier_t volumeKey,
-         identifier_t layerKey,
-         identifier_t moduleKey,
-         data_t       obj)
+         identifier_t                        volumeKey,
+         identifier_t                        layerKey,
+         identifier_t                        moduleKey,
+         data_t                              obj)
   {
     // find if the volume has an entry
     auto volumeData = dData.find(volumeKey);
@@ -83,9 +83,9 @@ namespace Data {
   template <typename identifier_t, typename data_t>
   const ModuleData<identifier_t>*
   read(DetectorData<identifier_t, data_t>& dData,
-       identifier_t volumeKey,
-       identifier_t layerKey,
-       identifier_t moduleKey)
+       identifier_t                        volumeKey,
+       identifier_t                        layerKey,
+       identifier_t                        moduleKey)
   {
     // find if the volume has an entry
     auto volumeData = dData.find(volumeKey);
@@ -112,8 +112,8 @@ namespace Data {
   template <typename identifier_t, typename data_t>
   const LayerData<identifier_t, data_t>*
   read(DetectorData<identifier_t, data_t>& dData,
-       identifier_t volumeKey,
-       identifier_t layerKey)
+       identifier_t                        volumeKey,
+       identifier_t                        layerKey)
   {
     // find if the volume has an entry
     auto volumeData = dData.find(volumeKey);

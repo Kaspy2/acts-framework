@@ -25,7 +25,7 @@ using RecordedMaterial = MaterialInteractor::result_type;
 //   and the Recorded material
 using RecordedMaterialTrack
     = std::pair<std::pair<Acts::Vector3D, Acts::Vector3D>, RecordedMaterial>;
-}
+}  // namespace Acts
 
 namespace FW {
 
@@ -39,7 +39,7 @@ namespace Root {
   /// It writes out a MaterialTrack which is usually generated from
   /// Geant4 material mapping
   class RootMaterialTrackWriter
-      : public WriterT<std::vector<Acts::RecordedMaterialTrack>>
+    : public WriterT<std::vector<Acts::RecordedMaterialTrack>>
   {
   public:
     using Base = WriterT<std::vector<Acts::RecordedMaterialTrack>>;

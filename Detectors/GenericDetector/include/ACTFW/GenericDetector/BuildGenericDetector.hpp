@@ -47,10 +47,10 @@ namespace Generic {
   /// @param lOverlap is the overlap of the modules (longitudinal)
   /// @binningSchema is the way the bins are laid out rphi x z
   std::vector<Acts::Vector3D>
-  modulePositionsCylinder(double radius,
-                          double zStagger,
-                          double moduleHalfLength,
-                          double lOverlap,
+  modulePositionsCylinder(double                     radius,
+                          double                     zStagger,
+                          double                     moduleHalfLength,
+                          double                     lOverlap,
                           const std::pair<int, int>& binningSchema);
 
   /// Helper method for positioning
@@ -179,9 +179,7 @@ namespace Generic {
     std::shared_ptr<const Acts::ISurfaceMaterial> beamPipeMaterial
         = std::make_shared<const Acts::HomogeneousSurfaceMaterial>(
             Acts::MaterialProperties(352.8, 407., 9.012, 4., 1.848e-3, 0.8));
-    if (protoMaterial) {
-      beamPipeMaterial = pCylinderMaterial;
-    }
+    if (protoMaterial) { beamPipeMaterial = pCylinderMaterial; }
 
     // configure the beam pipe layer builder
     Acts::PassiveLayerBuilder::Config bplConfig;
@@ -316,9 +314,9 @@ namespace Generic {
                                       1. * Acts::units::_mm,
                                       1. * Acts::units::_mm,
                                       1. * Acts::units::_mm};
-    std::vector<double> perHX = {8.4, 8.4};  // half length x
-    std::vector<double> perHY = {36., 36.};  // half length y
-    std::vector<size_t> perBP = {40, 68};    // bins in phi
+    std::vector<double> perHX      = {8.4, 8.4};  // half length x
+    std::vector<double> perHY      = {36., 36.};  // half length y
+    std::vector<size_t> perBP      = {40, 68};    // bins in phi
     std::vector<double> perT
         = {pEndcapModuleT, pEndcapModuleT};    // module thickness
     std::vector<size_t> perBX = {336, 336};    // bins in x
@@ -340,9 +338,8 @@ namespace Generic {
     pplConfig.posnegModuleReadoutSide = std::vector<std::vector<int>>(7, perRS);
     pplConfig.posnegModuleLorentzAngle
         = std::vector<std::vector<double>>(7, perLA);
-    pplConfig.posnegModuleMaterial = std::
-        vector<std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(
-            7, perM);
+    pplConfig.posnegModuleMaterial = std::vector<
+        std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(7, perM);
 
     // no frontside/backside
     pplConfig.posnegModuleFrontsideStereo = {};
@@ -424,9 +421,7 @@ namespace Generic {
       std::shared_ptr<const Acts::ISurfaceMaterial> pstMaterial
           = std::make_shared<const Acts::HomogeneousSurfaceMaterial>(
               Acts::MaterialProperties(352.8, 407., 9.012, 4., 1.848e-3, 1.8));
-      if (protoMaterial) {
-        pstMaterial = pCylinderMaterial;
-      }
+      if (protoMaterial) { pstMaterial = pCylinderMaterial; }
 
       // Configuration
       Acts::PassiveLayerBuilder::Config pstConfig;
@@ -526,7 +521,7 @@ namespace Generic {
       ssplConfig.centralModuleReadoutSide  = {1, 1, 1, 1};
       ssplConfig.centralModuleLorentzAngle = {0.12, 0.12, 0.12, 0.12};
 
-      ssplConfig.centralModuleMaterial = {ssCentralModuleMaterial,
+      ssplConfig.centralModuleMaterial        = {ssCentralModuleMaterial,
                                           ssCentralModuleMaterial,
                                           ssCentralModuleMaterial,
                                           ssCentralModuleMaterial};
@@ -593,9 +588,9 @@ namespace Generic {
       ssplConfig.posnegModuleLorentzAngle
           = std::vector<std::vector<double>>(nposnegs, mrLorentzAngle);
 
-      ssplConfig.posnegModuleMaterial = std::
-          vector<std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(
-              nposnegs, mMaterial);
+      ssplConfig.posnegModuleMaterial = std::vector<
+          std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(
+          nposnegs, mMaterial);
 
       ssplConfig.posnegModuleFrontsideStereo = {};
       ssplConfig.posnegModuleBacksideStereo  = {};
@@ -794,9 +789,9 @@ namespace Generic {
       lsplConfig.posnegModuleLorentzAngle
           = std::vector<std::vector<double>>(nposnegs, mrLorentzAngle);
 
-      lsplConfig.posnegModuleMaterial = std::
-          vector<std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(
-              nposnegs, mMaterial);
+      lsplConfig.posnegModuleMaterial = std::vector<
+          std::vector<std::shared_ptr<const Acts::ISurfaceMaterial>>>(
+          nposnegs, mMaterial);
       lsplConfig.posnegModuleFrontsideStereo = {};
       lsplConfig.posnegModuleBacksideStereo  = {};
       lsplConfig.posnegModuleBacksideGap     = {};

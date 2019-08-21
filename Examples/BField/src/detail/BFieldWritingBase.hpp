@@ -23,9 +23,9 @@ namespace BField {
       writerConfig.gridType = Root::GridType::rz;
     else
       writerConfig.gridType = Root::GridType::xyz;
-    writerConfig.treeName   = vm["bf-map-out"].template as<std::string>();
-    writerConfig.fileName   = vm["bf-file-out"].template as<std::string>();
-    writerConfig.bField     = bField;
+    writerConfig.treeName = vm["bf-map-out"].template as<std::string>();
+    writerConfig.fileName = vm["bf-file-out"].template as<std::string>();
+    writerConfig.bField   = bField;
     std::cout << "setting rBounds" << std::endl;
     if (vm.count("bf-rRange") && vm.count("bf-zRange")) {
       auto rBounds = vm["bf-rRange"].template as<read_range>();
@@ -41,5 +41,5 @@ namespace BField {
 
     FW::Root::RootBFieldWriter<bfield_t>::run(writerConfig);
   }
-}
-}
+}  // namespace BField
+}  // namespace FW

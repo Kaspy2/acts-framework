@@ -71,5 +71,5 @@ namespace Root {
     float      m_qp{0.};               ///< q/p
   };
 
-}  // namespace ROOT
+}  // namespace Root
 }  // namespace FW

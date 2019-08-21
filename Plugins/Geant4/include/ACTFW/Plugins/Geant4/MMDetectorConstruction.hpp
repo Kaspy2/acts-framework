@@ -53,5 +53,5 @@ namespace Geant4 {
     TGeoNode*    m_tgeoNode;
     std::string* m_gdmlFile;
   };
-}  // namespace G4
+}  // namespace Geant4
 }  // namespace FW

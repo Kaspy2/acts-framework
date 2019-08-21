@@ -71,6 +71,6 @@ namespace BField {
       return *m_logger;
     }
   };
-}  // namespace Contextual
+}  // namespace BField
 
 }  // namespace FW

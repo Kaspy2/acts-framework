@@ -29,7 +29,7 @@ using SurfaceMaterialMap
 
 using VolumeMaterialMap
     = std::map<GeometryID, std::shared_ptr<const IVolumeMaterial>>;
-}
+}  // namespace Acts
 
 namespace FW {
 
@@ -111,9 +111,7 @@ namespace Root {
     decorate(Acts::Surface& surface) const final
     {
       // Null out the material for this surface
-      if (m_clearSurfaceMaterial) {
-        surface.assignSurfaceMaterial(nullptr);
-      }
+      if (m_clearSurfaceMaterial) { surface.assignSurfaceMaterial(nullptr); }
       // Try to find the surface in the map
       auto sMaterial = m_surfaceMaterialMap.find(surface.geoID());
       if (sMaterial != m_surfaceMaterialMap.end()) {
@@ -128,9 +126,7 @@ namespace Root {
     decorate(Acts::TrackingVolume& volume) const final
     {
       // Null out the material for this volume
-      if (m_clearSurfaceMaterial) {
-        volume.assignVolumeMaterial(nullptr);
-      }
+      if (m_clearSurfaceMaterial) { volume.assignVolumeMaterial(nullptr); }
       // Try to find the surface in the map
       auto vMaterial = m_volumeMaterialMap.find(volume.geoID());
       if (vMaterial != m_volumeMaterialMap.end()) {

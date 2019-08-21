@@ -128,8 +128,8 @@ create_element(Detector& lcdd, xml_h e, SensitiveDetector sens)
 
     if (sens_distance < minRadius) minRadius = sens_distance;
     if (supp_distance < minRadius) minRadius = supp_distance;
-    if (sens_zhalf < minZhalf) minZhalf      = sens_zhalf;
-    if (supp_zhalf < minZhalf) minZhalf      = supp_zhalf;
+    if (sens_zhalf < minZhalf) minZhalf = sens_zhalf;
+    if (supp_zhalf < minZhalf) minZhalf = supp_zhalf;
 
     //-----------------------------------
     //  store the data in an extension to be used for reconstruction
@@ -258,7 +258,8 @@ create_element(Detector& lcdd, xml_h e, SensitiveDetector sens)
 
 #if 0  //-------- add an inscribing cylinder of air for tracking purposes
        //-----------------
-       //  this screw up the geometry and the material scan does not work anymore !!!!!?????
+       //  this screw up the geometry and the material scan does not work
+       //  anymore !!!!!?????
 
  /* double tube_thick =  1.0 * dd4hep::mm ;
   double inner_r    =  minRadius - 1.1 * tube_thick ;

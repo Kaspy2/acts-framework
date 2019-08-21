@@ -55,5 +55,5 @@ namespace Geant4 {
     /// Instance of the EventAction
     static MMRunAction* fgInstance;
   };
-}  // namespace G4
+}  // namespace Geant4
 }  // namespace FW

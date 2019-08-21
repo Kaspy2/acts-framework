@@ -183,5 +183,5 @@ namespace utils {
       return defaultValue;
     }
   }
-}
-}
+}  // namespace utils
+}  // namespace det

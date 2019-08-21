@@ -90,6 +90,6 @@ createSimpleLayeredCylinder(dd4hep::Detector&         lcdd,
 
   return detElement;
 }
-}
+}  // namespace det
 
 DECLARE_DETELEMENT(SimpleLayeredCylinder, det::createSimpleLayeredCylinder)

@@ -31,7 +31,7 @@ FW::Csv::CsvPlanarClusterWriter::CsvPlanarClusterWriter(
 
 FW::ProcessCode
 FW::Csv::CsvPlanarClusterWriter::writeT(
-    const AlgorithmContext& context,
+    const AlgorithmContext&                                          context,
     const FW::DetectorData<geo_id_value, Acts::PlanarModuleCluster>& clusters)
 {
   // open per-event hits file

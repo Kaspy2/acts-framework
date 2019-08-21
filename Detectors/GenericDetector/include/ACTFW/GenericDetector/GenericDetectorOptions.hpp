@@ -36,5 +36,5 @@ namespace Options {
                       "detector only, 2 - full barrel only, 3 - full detector "
                       "(without stereo modules).");
   }
-}
-}
+}  // namespace Options
+}  // namespace FW

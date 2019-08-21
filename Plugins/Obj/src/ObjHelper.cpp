@@ -82,7 +82,7 @@ FW::Obj::writePlanarFace(std::ofstream&                     stream,
   Acts::Vector3D sideTwo = vertices[2] - vertices[1];
   Acts::Vector3D nvector(sideTwo.cross(sideOne).normalized());
   // thickness or not thickness
-  std::vector<int> sides     = {0};
+  std::vector<int> sides = {0};
   if (thickness != 0.) sides = {-1, 1};
   // now write all the vertices - this works w/wo thickness
   for (auto side : sides) {
@@ -121,7 +121,7 @@ FW::Obj::writeTube(std::ofstream&           stream,
   // the number of phisteps
   double phistep = 2 * M_PI / nSegments;
   // make it twice if necessary
-  std::vector<double> roffsets  = {0.};
+  std::vector<double> roffsets = {0.};
   if (thickness != 0.) roffsets = {-0.5 * thickness, 0.5 * thickness};
   // now loop over the thickness and make an outer and inner
   unsigned int cvc   = vtnCounter.vcounter;
@@ -134,9 +134,10 @@ FW::Obj::writeTube(std::ofstream&           stream,
       double phi = -M_PI + iphi * phistep;
       for (auto iflip : flip) {
         // create the vertex
-        Acts::Vector3D point(transform * Acts::Vector3D((r + t) * cos(phi),
-                                                        (r + t) * sin(phi),
-                                                        iflip * hZ));
+        Acts::Vector3D point(transform
+                             * Acts::Vector3D((r + t) * cos(phi),
+                                              (r + t) * sin(phi),
+                                              iflip * hZ));
         // write the normal vector
         writeVTN(stream, vtnCounter, scalor, point, "v");
       }

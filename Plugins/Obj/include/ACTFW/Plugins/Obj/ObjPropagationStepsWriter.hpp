@@ -28,7 +28,7 @@ namespace Obj {
   /// One Thread per write call and hence thread safe
   template <typename step_t>
   class ObjPropagationStepsWriter
-      : public WriterT<std::vector<std::vector<step_t>>>
+    : public WriterT<std::vector<std::vector<step_t>>>
   {
   public:
     using Base = WriterT<std::vector<std::vector<step_t>>>;
@@ -108,5 +108,5 @@ namespace Obj {
     }
   };
 
-}  // namespace Root
+}  // namespace Obj
 }  // namespace FW

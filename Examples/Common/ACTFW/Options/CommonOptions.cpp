@@ -176,9 +176,7 @@ FW::Options::readSequencerConfig(
 {
   Sequencer::Config cfg;
   cfg.skip = vm["skip"].as<size_t>();
-  if (not vm["events"].empty()) {
-    cfg.events = vm["events"].as<size_t>();
-  }
+  if (not vm["events"].empty()) { cfg.events = vm["events"].as<size_t>(); }
   cfg.logLevel   = readLogLevel(vm);
   cfg.numThreads = vm["jobs"].as<int>();
   if (not vm["output-dir"].empty()) {

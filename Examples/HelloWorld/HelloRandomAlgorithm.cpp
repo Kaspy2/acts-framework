@@ -36,13 +36,13 @@ FW::HelloRandomAlgorithm::execute(const AlgorithmContext& ctx) const
   FW::RandomEngine rng = m_cfg.randomNumbers->spawnGenerator(ctx);
 
   // Spawn some random number distributions
-  std::normal_distribution<double> gaussDist(m_cfg.gaussParameters[0],
+  std::normal_distribution<double>       gaussDist(m_cfg.gaussParameters[0],
                                              m_cfg.gaussParameters[1]);
   std::uniform_real_distribution<double> uniformDist(
       m_cfg.uniformParameters[0], m_cfg.uniformParameters[1]);
   std::gamma_distribution<double> gammaDist(m_cfg.gammaParameters[0],
                                             m_cfg.gammaParameters[1]);
-  std::poisson_distribution<int> poissonDist(m_cfg.poissonParameter);
+  std::poisson_distribution<int>  poissonDist(m_cfg.poissonParameter);
 
   ACTS_INFO(m_cfg.drawsPerEvent << " draws per event will be done");
 

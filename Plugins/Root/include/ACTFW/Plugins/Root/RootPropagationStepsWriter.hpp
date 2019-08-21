@@ -32,7 +32,7 @@ namespace Root {
   ///
   /// Safe to use from multiple writer threads - uses a std::mutex lock.
   class RootPropagationStepsWriter
-      : public WriterT<std::vector<PropagationSteps>>
+    : public WriterT<std::vector<PropagationSteps>>
   {
   public:
     using Base = WriterT<std::vector<PropagationSteps>>;

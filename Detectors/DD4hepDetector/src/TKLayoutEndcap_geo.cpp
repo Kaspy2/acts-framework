@@ -46,8 +46,8 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
     double     l_rmax   = x_layer.outer_r();
     double     l_length = x_layer.dz();
     // Create Volume and DetElement for Layer
-    string layer_name = det_name + _toString((int)layer_num, "layer%d");
-    Volume layer_vol(layer_name,
+    string     layer_name = det_name + _toString((int)layer_num, "layer%d");
+    Volume     layer_vol(layer_name,
                      Tube(l_rmin, l_rmax, l_length),
                      lcdd.material(x_layer.materialStr()));
     DetElement lay_det(cylinderVolume, layer_name, layer_num);
@@ -76,18 +76,16 @@ create_element(Detector& lcdd, xml_h xml, SensitiveDetector sens)
           string zname = _toString((int)k, "z%d");
           // Visualization
           mod_vol.setVisAttributes(lcdd, x_module.visStr());
-          double phi = deltaphi / dd4hep::rad * k;
-          string module_name
-              = zname + _toString((int)(repeat * module_num_num + module_num),
-                                  "module%d");
+          double phi         = deltaphi / dd4hep::rad * k;
+          string module_name = zname
+              + _toString((int)(repeat * module_num_num + module_num),
+                          "module%d");
           Position trans(radius * cos(phi), radius * sin(phi), slicedz);
           // Create the module DetElement
           DetElement mod_det(
               lay_det, module_name, repeat * module_num_num + module_num);
           // Set Sensitive Volmes sensitive
-          if (x_module.isSensitive()) {
-            mod_vol.setSensitiveDetector(sens);
-          }
+          if (x_module.isSensitive()) { mod_vol.setSensitiveDetector(sens); }
           // Place Module Box Volumes in layer
           PlacedVolume placedmodule = layer_vol.placeVolume(
               mod_vol,

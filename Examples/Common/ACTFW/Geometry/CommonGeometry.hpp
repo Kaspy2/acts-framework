@@ -62,5 +62,5 @@ namespace Geometry {
     return geometrySetup(vm, matDeco);
   }
 
-}  // namespace
-}  // namespace
+}  // namespace Geometry
+}  // namespace FW

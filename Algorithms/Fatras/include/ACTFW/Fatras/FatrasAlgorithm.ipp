@@ -28,8 +28,7 @@ FW::FatrasAlgorithm<simulator_t, event_collection_t, hit_t>::execute(
       = context.eventStore.get<event_collection_t>(m_cfg.inputEventCollection);
 
   ACTS_DEBUG("Read collection '" << m_cfg.inputEventCollection << "' with "
-                                 << inputEvent.size()
-                                 << " vertices");
+                                 << inputEvent.size() << " vertices");
 
   // Output: simulated particles attached to their process vertices
   // we start with a copy of the current event

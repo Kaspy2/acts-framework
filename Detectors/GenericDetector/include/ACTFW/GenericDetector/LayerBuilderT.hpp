@@ -31,8 +31,8 @@ namespace FW {
 namespace Generic {
 
   using Acts::VectorHelpers::eta;
-  using Acts::VectorHelpers::phi;
   using Acts::VectorHelpers::perp;
+  using Acts::VectorHelpers::phi;
 
   typedef std::pair<const Acts::Surface*, Acts::Vector3D> SurfacePosition;
 

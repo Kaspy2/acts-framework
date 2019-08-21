@@ -160,5 +160,5 @@ namespace TGeo {
     return trackingGeometry;
   }
 
-}  // namespace Root
+}  // namespace TGeo
 }  // namespace FW

@@ -320,13 +320,12 @@ compareRootFiles(std::string file1,
     std::cout << "    o Sorting the first tree..." << std::endl;
     {
       std::cout << "      ~ Defining event comparison operator..." << std::endl;
-      IndexComparator t1CompareEvents = [&branchComparisonHarnesses](
-          std::size_t i, std::size_t j) -> Ordering {
+      IndexComparator t1CompareEvents
+          = [&branchComparisonHarnesses](std::size_t i,
+                                         std::size_t j) -> Ordering {
         for (auto& branchHarness : branchComparisonHarnesses) {
           const auto order = branchHarness.sortHarness.first.first(i, j);
-          if (order != Ordering::EQUAL) {
-            return order;
-          }
+          if (order != Ordering::EQUAL) { return order; }
         }
         return Ordering::EQUAL;
       };
@@ -346,13 +345,12 @@ compareRootFiles(std::string file1,
     std::cout << "    o Sorting the second tree..." << std::endl;
     {
       std::cout << "      ~ Defining event comparison operator..." << std::endl;
-      IndexComparator t2CompareEvents = [&branchComparisonHarnesses](
-          std::size_t i, std::size_t j) -> Ordering {
+      IndexComparator t2CompareEvents
+          = [&branchComparisonHarnesses](std::size_t i,
+                                         std::size_t j) -> Ordering {
         for (auto& branchHarness : branchComparisonHarnesses) {
           const auto order = branchHarness.sortHarness.second.first(i, j);
-          if (order != Ordering::EQUAL) {
-            return order;
-          }
+          if (order != Ordering::EQUAL) { return order; }
         }
         return Ordering::EQUAL;
       };

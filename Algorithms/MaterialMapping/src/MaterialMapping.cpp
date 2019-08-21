@@ -46,7 +46,7 @@ FW::MaterialMapping::~MaterialMapping()
   Acts::DetectorMaterialMaps detectorMaterial;
 
   // Loop over the state, and collect the maps for surfaces
-  for (auto & [ key, value ] : m_mappingState.surfaceMaterial) {
+  for (auto& [key, value] : m_mappingState.surfaceMaterial) {
     detectorMaterial.first.insert({key, std::move(value)});
   }
 

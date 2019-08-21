@@ -20,7 +20,7 @@ class PlanarBounds;
 class DiscBounds;
 class ISurfaceMaterial;
 class DigitizationModule;
-}
+}  // namespace Acts
 
 namespace FW {
 

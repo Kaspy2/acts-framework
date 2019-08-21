@@ -50,8 +50,9 @@ momentumDistributions(std::string inFile,
   tree->SetBranchAddress("StepZ", &z);
 
   Int_t entries = tree->GetEntries();
-  std::cout << "Creating new output file: " << outFile << " and writing "
-                                                          "material maps"
+  std::cout << "Creating new output file: " << outFile
+            << " and writing "
+               "material maps"
             << std::endl;
   TFile outputFile(outFile.c_str(), "recreate");
 

@@ -74,5 +74,5 @@ namespace Data {
     }
   };
 
-}  // end of namesapce Data
+}  // namespace Data
 }  // end of namespace FW

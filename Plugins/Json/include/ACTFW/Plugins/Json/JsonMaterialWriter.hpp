@@ -32,7 +32,7 @@ using VolumeMaterialMap
     = std::map<GeometryID, std::shared_ptr<const IVolumeMaterial>>;
 
 using DetectorMaterialMaps = std::pair<SurfaceMaterialMap, VolumeMaterialMap>;
-}
+}  // namespace Acts
 
 namespace FW {
 

@@ -17,8 +17,8 @@
 #include "Acts/Utilities/Helpers.hpp"
 
 using Acts::VectorHelpers::eta;
-using Acts::VectorHelpers::phi;
 using Acts::VectorHelpers::perp;
+using Acts::VectorHelpers::phi;
 
 FW::Root::RootMaterialTrackWriter::RootMaterialTrackWriter(
     const FW::Root::RootMaterialTrackWriter::Config& cfg,

@@ -23,7 +23,7 @@ format:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: none # we don't need to check core submodule
-  image: gitlab-registry.cern.ch/acts/machines/check:latest
+  image: gitlab-registry.cern.ch/acts/machines/check_llvm8:latest
   before_script:
     - git submodule deinit -f external/*
   script:

@@ -84,8 +84,7 @@ layerMaterial(std::string inFile,
   layer->SetBranchAddress("thickness", &t);
 
   if (layer->FindBranch("globX") && layer->FindBranch("globY")
-      && layer->FindBranch("globZ")
-      && layer->FindBranch("globR")) {
+      && layer->FindBranch("globZ") && layer->FindBranch("globR")) {
     layer->SetBranchAddress("globX", &globX);
     layer->SetBranchAddress("globY", &globY);
     layer->SetBranchAddress("globZ", &globZ);
@@ -112,8 +111,9 @@ layerMaterial(std::string inFile,
   float max1    = *minmax1.second;
 
   inputFile.Close();
-  std::cout << "Creating new output file: " << outFile << " and writing "
-                                                          "material maps"
+  std::cout << "Creating new output file: " << outFile
+            << " and writing "
+               "material maps"
             << std::endl;
   TFile       outputFile(outFile.c_str(), "update");
   TDirectory* dir = outputFile.mkdir(layerName.c_str());

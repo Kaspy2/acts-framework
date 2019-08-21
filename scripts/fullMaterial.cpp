@@ -52,13 +52,12 @@ fullMaterial(std::string inFile,
   std::vector<Acts::MaterialTrack> mrecords;
   std::cout << "Accessing Branch 'MaterialTracks'" << std::endl;
   TTreeReaderValue<Acts::MaterialTrack> mtRecord(reader, "MaterialTracks");
-  while (reader.Next()) {
-    mrecords.push_back(*mtRecord);
-  }
+  while (reader.Next()) { mrecords.push_back(*mtRecord); }
   inputFile.Close();
 
-  std::cout << "Creating new output file: " << outFile << " and writing "
-                                                          "material maps"
+  std::cout << "Creating new output file: " << outFile
+            << " and writing "
+               "material maps"
             << std::endl;
   TFile outputFile(outFile.c_str(), "recreate");
   // thickness

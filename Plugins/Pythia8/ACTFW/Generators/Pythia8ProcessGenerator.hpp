@@ -33,8 +33,8 @@ public:
         = {{"HardQCD:all = on"}};  ///< additional pythia settings
   };
 
-  static std::function<std::vector<Data::SimVertex<Data::SimParticle>>(
-      RandomEngine&)>
+  static std::function<
+      std::vector<Data::SimVertex<Data::SimParticle>>(RandomEngine&)>
   makeFunction(const Config& cfg);
 
   // try to prevent pythia breakage by forbidding copying

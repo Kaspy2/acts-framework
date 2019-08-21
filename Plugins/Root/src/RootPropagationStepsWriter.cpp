@@ -66,9 +66,7 @@ FW::Root::RootPropagationStepsWriter::RootPropagationStepsWriter(
 FW::Root::RootPropagationStepsWriter::~RootPropagationStepsWriter()
 {
   /// Close the file if it's yours
-  if (m_cfg.rootFile == nullptr) {
-    m_outputFile->Close();
-  }
+  if (m_cfg.rootFile == nullptr) { m_outputFile->Close(); }
 }
 
 FW::ProcessCode
@@ -78,8 +76,7 @@ FW::Root::RootPropagationStepsWriter::endRun()
   m_outputFile->cd();
   m_outputTree->Write();
   ACTS_VERBOSE("Wrote particles to tree '" << m_cfg.treeName << "' in '"
-                                           << m_cfg.filePath
-                                           << "'");
+                                           << m_cfg.filePath << "'");
   return ProcessCode::SUCCESS;
 }
 

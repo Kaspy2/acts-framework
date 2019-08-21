@@ -25,8 +25,8 @@ struct FrameworkRndmEngine : public Pythia8::RndmEngine
 };
 }  // namespace
 
-std::function<std::vector<FW::Data::SimVertex<FW::Data::SimParticle>>(
-    FW::RandomEngine&)>
+std::function<
+    std::vector<FW::Data::SimVertex<FW::Data::SimParticle>>(FW::RandomEngine&)>
 FW::Pythia8Generator::makeFunction(const FW::Pythia8Generator::Config& cfg)
 {
   auto gen = std::make_shared<Pythia8Generator>(cfg);

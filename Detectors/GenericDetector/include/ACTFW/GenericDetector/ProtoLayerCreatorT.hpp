@@ -34,15 +34,15 @@ namespace Acts {
 class LayerCreator;
 class Surface;
 class DetecorElementBase;
-}
+}  // namespace Acts
 
 namespace FW {
 
 namespace Generic {
 
   using Acts::VectorHelpers::eta;
-  using Acts::VectorHelpers::phi;
   using Acts::VectorHelpers::perp;
+  using Acts::VectorHelpers::phi;
 
   using SurfacePosition = std::pair<const Acts::Surface*, Acts::Vector3D>;
 
@@ -221,9 +221,7 @@ namespace Generic {
 
     // Count the current detector modules identifiers
     size_t imodule = 0;
-    for (auto& eLayers : detectorStore) {
-      imodule += eLayers.size();
-    }
+    for (auto& eLayers : detectorStore) { imodule += eLayers.size(); }
     ACTS_VERBOSE("Starting with identfier " << imodule);
 
     // ----------------------- central layers -------------------------
@@ -258,12 +256,9 @@ namespace Generic {
             * m_cfg.centralModuleBinningSchema.at(icl).second;
 
         ACTS_DEBUG("- number of modules "
-                   << nCentralModules
-                   << " ( from "
-                   << m_cfg.centralModuleBinningSchema.at(icl).first
-                   << " x "
-                   << m_cfg.centralModuleBinningSchema.at(icl).second
-                   << " )");
+                   << nCentralModules << " ( from "
+                   << m_cfg.centralModuleBinningSchema.at(icl).first << " x "
+                   << m_cfg.centralModuleBinningSchema.at(icl).second << " )");
 
         sVector.reserve(nCentralModules);
 
@@ -451,9 +446,7 @@ namespace Generic {
 
     // Count the current detector modules identifiers
     size_t imodule = 0;
-    for (auto& eLayers : detectorStore) {
-      imodule += eLayers.size();
-    }
+    for (auto& eLayers : detectorStore) { imodule += eLayers.size(); }
     ACTS_VERBOSE("Starting with identfier " << imodule);
     // the return layers
     std::vector<ProtoLayerSurfaces> epLayers;
@@ -464,17 +457,15 @@ namespace Generic {
     size_t numpnLayers = m_cfg.posnegLayerPositionsZ.size();
     if (numpnLayers) {
       ACTS_DEBUG("Configured to build 2 * "
-                 << numpnLayers
-                 << " passive positive/negative side layers.");
+                 << numpnLayers << " passive positive/negative side layers.");
       epLayers.reserve(numpnLayers);
 
       /// this is the loop over th elayer positions
       for (size_t ipnl = 0; ipnl < numpnLayers; ++ipnl) {
         // some screen output
-        ACTS_VERBOSE(
-            "- building layer " << ipnl << " and " << numpnLayers + ipnl
-                                << " at z = "
-                                << side * m_cfg.posnegLayerPositionsZ.at(ipnl));
+        ACTS_VERBOSE("- building layer "
+                     << ipnl << " and " << numpnLayers + ipnl << " at z = "
+                     << side * m_cfg.posnegLayerPositionsZ.at(ipnl));
         /// some preparation work
         // define the layer envelope
         double layerEnvelopeR = m_cfg.posnegLayerEnvelopeR.at(ipnl);

@@ -30,9 +30,7 @@ namespace detail {
                 std::ostream& os)
     {
       for (auto it = begin; it != end; ++it) {
-        if (it != begin) {
-          os << separator;
-        }
+        if (it != begin) { os << separator; }
         os << *it;
       }
       return os;

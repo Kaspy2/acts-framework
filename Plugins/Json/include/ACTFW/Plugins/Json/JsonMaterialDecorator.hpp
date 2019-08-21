@@ -28,7 +28,7 @@ using SurfaceMaterialMap
 
 using VolumeMaterialMap
     = std::map<GeometryID, std::shared_ptr<const IVolumeMaterial>>;
-}
+}  // namespace Acts
 
 namespace FW {
 
@@ -70,9 +70,7 @@ namespace Json {
     decorate(Acts::Surface& surface) const final
     {
       // Clear the material if registered to do so
-      if (m_clearSurfaceMaterial) {
-        surface.assignSurfaceMaterial(nullptr);
-      }
+      if (m_clearSurfaceMaterial) { surface.assignSurfaceMaterial(nullptr); }
 
       // Try to find the surface in the map
       auto sMaterial = m_surfaceMaterialMap.find(surface.geoID());
@@ -88,9 +86,7 @@ namespace Json {
     decorate(Acts::TrackingVolume& volume) const final
     {
       // Clear the material if registered to do so
-      if (m_clearVolumeMaterial) {
-        volume.assignVolumeMaterial(nullptr);
-      }
+      if (m_clearVolumeMaterial) { volume.assignVolumeMaterial(nullptr); }
     }
 
   private:
