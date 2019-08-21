@@ -1,4 +1,4 @@
-// This file is part of the Acts project.
+/// This file is part of the Acts project.
 //
 // Copyright (C) 2017 Acts project team
 //
@@ -487,8 +487,7 @@ private:
                const std::string& branchName,
                const std::string  elemType)
   {
-    // clang-format off
-
+// clang-format off
     // We support vectors of different types by switching across type (strings)
     #define CREATE_VECTOR__HANDLE_TYPE(type_name)  \
     if(elemType == #type_name) {  \
