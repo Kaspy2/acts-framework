@@ -24,6 +24,7 @@ namespace FW {
 namespace Geant4 {
 
 	/// @brief Data container of a particle
+	// TODO: maybe replace this by an Acts particle
 	struct ParticleRecord
 	{
 		std::array<double, 3> position, momentum;
@@ -66,6 +67,12 @@ namespace Geant4 {
     void AddParticle(ParticleRecord& p)
     {
 		m_particles[p.trackid].push_back(p);
+	}
+	
+	std::vector<std::vector<ParticleRecord>>
+	outcomingParticles() const
+	{
+		return m_events;
 	}
 	
     /// Interface method

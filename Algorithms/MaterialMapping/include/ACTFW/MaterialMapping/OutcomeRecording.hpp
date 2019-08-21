@@ -27,7 +27,7 @@ public:
   /// @class Config
   struct Config
   {
-    std::string geantMaterialCollection = "geant-outcome-tracks";
+    std::string particleCollection = "geant-outcome-tracks";
 
     /// The service possibly providing the Geant4 geometry (optional)
     /// @note If this is not set, the geometry should be given by gdml file
@@ -51,7 +51,7 @@ public:
 	double theta = 0.5 * M_PI;
 	
 	bool lockPosition = false;
-	Vector3D pos(0., 0., 0.);
+	Acts::Vector3D pos = {0., 0., 0.};
   };
 
   /// Constructor

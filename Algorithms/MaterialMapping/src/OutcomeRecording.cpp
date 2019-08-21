@@ -11,10 +11,10 @@
 #include <stdexcept>
 #include "ACTFW/Framework/WhiteBoard.hpp"
 #include "ACTFW/Plugins/Geant4/MMDetectorConstruction.hpp"
-#include "ACTFW/Plugins/Geant4/MMEventAction.hpp"
-#include "ACTFW/Plugins/Geant4/MMPrimaryGeneratorAction.hpp"
+#include "ACTFW/Plugins/Geant4/OREventAction.hpp"
+#include "ACTFW/Plugins/Geant4/ORPrimaryGeneratorAction.hpp"
 #include "ACTFW/Plugins/Geant4/MMRunAction.hpp"
-#include "ACTFW/Plugins/Geant4/MMSteppingAction.hpp"
+#include "ACTFW/Plugins/Geant4/ORSteppingAction.hpp"
 #include "FTFP_BERT.hh"
 
 FW::OutcomeRecording::OutcomeRecording(
@@ -44,7 +44,7 @@ FW::OutcomeRecording::OutcomeRecording(
   /// Now set up the Geant4 simulation
   m_runManager->SetUserInitialization(new FTFP_BERT);
   m_runManager->SetUserAction(new FW::Geant4::ORPrimaryGeneratorAction(
-      cnf.particleName, cnf.energy, cnf.lockAngle, cnf.phi, cnf.theta, cnf.lockPosition, cnf.pos, m_cfg.seed1, m_cfg.seed2));
+      cnf.particleName, cnf.energy, cnf.lockAngle, cnf.phi, cnf.theta, cnf.lockPosition, {cnf.pos.x(), cnf.pos.y(), cnf.pos.z()}, m_cfg.seed1, m_cfg.seed2));
   FW::Geant4::MMRunAction* runaction = new FW::Geant4::MMRunAction();
   m_runManager->SetUserAction(runaction);
   FW::Geant4::OREventAction* evtAct = new FW::Geant4::OREventAction();
@@ -56,18 +56,17 @@ FW::OutcomeRecording::OutcomeRecording(
 FW::ProcessCode
 FW::OutcomeRecording::execute(const FW::AlgorithmContext& context) const
 {
-
   // Begin with the simulation
   m_runManager->BeamOn(m_cfg.tracksPerEvent);
   // Retrieve the track material tracks from Geant4
-  auto recordedMaterial
-      = FW::Geant4::MMEventAction::Instance()->MaterialTracks();
-  ACTS_INFO("Received " << recordedMaterial.size()
-                        << " MaterialTracks. Writing them now onto file...");
+  auto recordedParticles
+      = FW::Geant4::OREventAction::Instance()->outcomingParticles();
+  ACTS_INFO("Received " << recordedParticles.size()
+                        << " particles. Writing them now onto file...");
 
   // Write the recorded material to the event store
-  context.eventStore.add(m_cfg.geantMaterialCollection,
-                         std::move(recordedMaterial));
+  context.eventStore.add(m_cfg.particleCollection,
+                         std::move(recordedParticles));
 
   return FW::ProcessCode::SUCCESS;
 }
