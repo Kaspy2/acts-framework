@@ -10,8 +10,8 @@
 #include "ACTFW/Plugins/Geant4/OREventAction.hpp"
 #include <stdexcept>
 #include "Acts/Utilities/Units.hpp"
-#include "G4Material.hh"
 #include "G4Step.hh"
+#include "G4VProcess.hh"
 
 FW::Geant4::ORSteppingAction* FW::Geant4::ORSteppingAction::fgInstance
     = nullptr;
@@ -25,7 +25,6 @@ FW::Geant4::ORSteppingAction::Instance()
 
 FW::Geant4::ORSteppingAction::ORSteppingAction()
   : G4UserSteppingAction()
-// m_volMgr(MaterialRunAction::Instance()->getGeant4VolumeManager())
 {
   if (fgInstance) {
     throw std::logic_error("Attempted to duplicate a singleton");
@@ -46,7 +45,7 @@ FW::Geant4::ORSteppingAction::~ORSteppingAction()
 
 void
 FW::Geant4::ORSteppingAction::UserSteppingAction(const G4Step* step)
-{
+{	
 	ParticleRecord p;
 	p.position[0] = step->GetPostStepPoint()->GetPosition().x();
 	p.position[1] = step->GetPostStepPoint()->GetPosition().y();
@@ -60,6 +59,8 @@ FW::Geant4::ORSteppingAction::UserSteppingAction(const G4Step* step)
 	p.charge = step->GetPostStepPoint()->GetCharge();
 	p.trackid = step->GetTrack()->GetTrackID();
 	p.parentid = step->GetTrack()->GetParentID();
+	p.volume = (step->GetPostStepPoint()->GetPhysicalVolume() != nullptr) ? step->GetPostStepPoint()->GetPhysicalVolume()->GetName() : "No volume";
+	p.process = step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
 	m_EventAction->AddParticle(p);
 }
 

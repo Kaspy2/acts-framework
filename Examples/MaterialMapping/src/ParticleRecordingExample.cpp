@@ -70,7 +70,17 @@ public:
 		int eventNr = context.eventNumber;
 		
 		std::cout << "evtNr: " << eventNr << std::endl;
-		
+		for(const auto& evt : vertices)
+		{
+			std::cout << "New Track: " << std::endl;
+			for(const auto& p : evt)
+			{
+				//~ if(p.volume == "No volume")
+					std::cout << "TID: " << p.trackid << ",Parent: " << p.parentid << ", PID: " << p.pdg <<
+						", Position: (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << 
+						"), Momentum: (" << p.momentum[0] << ", " << p.momentum[1] << ", " << p.momentum[2] << "), Volume: " << p.volume << ", Process: " << p.process << std::endl;				
+			}
+		}
 		return ProcessCode::SUCCESS;
 	}
 
@@ -135,7 +145,7 @@ main(int argc, char* argv[])
   g4rConfig.seed1          = randomSeed1;
   g4rConfig.seed2          = randomSeed2;
   g4rConfig.particleCollection = "geant-outcome-tracks";
-  g4rConfig.particleName = "pi+";
+  g4rConfig.particleName =  vm["ammo"].template as<std::string>();
   g4rConfig.energy = 1000.;
   g4rConfig.lockAngle = true;
   g4rConfig.phi = 0.;

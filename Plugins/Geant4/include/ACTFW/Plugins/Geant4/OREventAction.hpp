@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <map>
+#include <string>
 #include "Acts/Propagator/MaterialInteractor.hpp"
 #include "G4UserEventAction.hh"
 #include "globals.hh"
@@ -31,6 +32,7 @@ namespace Geant4 {
 		int pdg;
 		double energy, mass;
 		int charge, trackid, parentid;
+		std::string volume, process;
 	};
 	
   class ORSteppingAction;
